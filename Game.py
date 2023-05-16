@@ -96,8 +96,12 @@ def draw_Grid():
                 elif richtung == 2: # Links
                     check_var = False
                     for i in range(Ship_Size):
-                        if visual_array[y//blocksize][x//blocksize - i] > 0 or x - i >= 0:
+                        if x//blocksize - i < 0:
                             check_var = True
+                        else:
+                            if visual_array[y//blocksize][x//blocksize - i] > 0:
+                                check_var = True
+                                break
                     if check_var == False:
                         for i in range(Ship_Size):
                             visual_array[y//blocksize][x//blocksize - i] = 5
@@ -105,15 +109,20 @@ def draw_Grid():
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
-                elif richtung == 3: # Hoch
+                elif richtung == 3:  # Hoch
                     check_var = False
                     for i in range(Ship_Size):
-                        if visual_array[y//blocksize - i][x//blocksize] > 0 or x - i >= 0:
+                        print(y//blocksize-i)
+                        if (y//blocksize) - i < 0:
+                            print("TEst")
                             check_var = True
+                        else:
+                            if visual_array[y // blocksize - i][x // blocksize] > 0:
+                                check_var = True
                     if check_var == False:
                         for i in range(Ship_Size):
-                            visual_array[y//blocksize - i][x//blocksize] = 5
-                            Ships_P1[y//blocksize - i][x//blocksize] = 1
+                            visual_array[y // blocksize - i][x // blocksize] = 5
+                            Ships_P1[y // blocksize - i][x // blocksize] = 1
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
@@ -160,16 +169,18 @@ def get_clicked_index(pos):
     return None
 
 def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
+    done_counter = 0
+
     #5er Schiff
     placed = False
-    placeable = True
-    while not placed:
+    while placed == False:
+        placeable = True
         random_x = random.randint(0, 9)
         random_y = random.randint(0, 9)
         direction = random.randint(1, 4)
         if direction == 1: # Rechts
             for i in range(5):
-                if random_x >= 10:
+                if random_x + i > 9:
                     placeable = False
             if placeable == True:
                 placed = True
@@ -177,7 +188,7 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
                     Ships_P2[random_y][random_x + j] = 1
         elif direction == 2: # Links
             for i in range(5):
-                if random_x <= 0:
+                if random_x - i <= 0:
                     placeable = False
             if placeable == True:
                 placed = True
@@ -185,8 +196,8 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
                     Ships_P2[random_y][random_x - j] = 1
 
         elif direction == 3: # Hoch
-            for i in range (5):
-                if random_y <= 0:
+            for i in range(5):
+                if random_y  + i <= 0:
                     placeable = False
             if placeable == True:
                 placed = True
@@ -195,27 +206,32 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 
         elif direction == 4: # Runter
             for i in range(5):
-                if random_y >= 10:
+                if random_y - i > 9:
                     placeable = False
             if placeable == True:
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y - j][random_x] = 1
+    done_counter = done_counter + 1
+    print(str(done_counter) + "/10 Schiffen gesetzt")
 
     #2x 4er Schiffe
     for k in range(2):
+        done_counter = done_counter + 1
+        print(str(done_counter) + "/10 Schiffen gesetzt")
         placed = False
-        placeable = True
-        while not placed:
+        while placed == False:
+            placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
             if direction == 1:  # Rechts
                 for i in range(4):
-                    if random_x >= 10:
+                    if random_x + i > 9:
                         placeable = False
-                    elif Ships_P2[random_y][random_x + j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x + i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -223,10 +239,11 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
                         Ships_P2[random_y][random_x + j] = 1
             elif direction == 2:  # Links
                 for i in range(4):
-                    if random_x <= 0:
+                    if random_x - i <= 0:
                         placeable = False
-                    elif Ships_P2[random_y][random_x - j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x - i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -235,42 +252,47 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 
             elif direction == 3:  # Hoch
                 for i in range(4):
-                    if random_y <= 0:
+                    if random_y - i <= 0:
                         placeable = False
-                    elif Ships_P2[random_y + j][random_x] == 1:
-                        placeable = False
-
-                if placeable == True:
-                    placed = True
-                    for j in range(4):
-                        Ships_P2[random_y + j][random_x] = 1
-
-            elif direction == 4:  # Runter
-                for i in range(4):
-                    if random_y >= 10:
-                        placeable = False
-                    elif Ships_P2[random_y - j][random_x] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y - i][random_x] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
                     for j in range(4):
                         Ships_P2[random_y - j][random_x] = 1
 
-    #3x 3er Schiffe
+            elif direction == 4:  # Runter
+                for i in range(4):
+                    if random_y + i > 9:
+                        placeable = False
+                    else:
+                        if Ships_P2[random_y + i][random_x] == 1:
+                            placeable = False
+
+                if placeable == True:
+                    placed = True
+                    for j in range(4):
+                        Ships_P2[random_y + j][random_x] = 1
+
+    # 3x 3er Schiffe
     for k in range(3):
         placed = False
-        placeable = True
-        while not placed:
+        done_counter = done_counter + 1
+        print(str(done_counter) + "/10 Schiffen gesetzt")
+        while placed == False:
+            placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
             if direction == 1:  # Rechts
                 for i in range(3):
-                    if random_x >= 10:
+                    if random_x + i > 9:
                         placeable = False
-                    elif Ships_P2[random_y][random_x + j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x + i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -278,10 +300,11 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
                         Ships_P2[random_y][random_x + j] = 1
             elif direction == 2:  # Links
                 for i in range(3):
-                    if random_x <= 0:
+                    if random_x - i < 0:
                         placeable = False
-                    elif Ships_P2[random_y][random_x - j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x - i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -290,42 +313,47 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 
             elif direction == 3:  # Hoch
                 for i in range(3):
-                    if random_y <= 0:
+                    if random_y - i < 0:
                         placeable = False
-                    elif Ships_P2[random_y + j][random_x] == 1:
-                        placeable = False
-
-                if placeable == True:
-                    placed = True
-                    for j in range(3):
-                        Ships_P2[random_y + j][random_x] = 1
-
-            elif direction == 4:  # Runter
-                for i in range(3):
-                    if random_y >= 10:
-                        placeable = False
-                    elif Ships_P2[random_y - j][random_x] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y - i][random_x] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
                     for j in range(3):
                         Ships_P2[random_y - j][random_x] = 1
 
-    #4x 2er Schiffe
+            elif direction == 4:  # Runter
+                for i in range(3):
+                    if random_y + i > 9:
+                        placeable = False
+                    else:
+                        if Ships_P2[random_y + i][random_x] == 1:
+                            placeable = False
+
+                if placeable == True:
+                    placed = True
+                    for j in range(3):
+                        Ships_P2[random_y + j][random_x] = 1
+
+    # 4x 2er Schiffe
     for k in range(4):
         placed = False
-        placeable = True
-        while not placed:
+        done_counter = done_counter + 1
+        print(str(done_counter) + "/10 Schiffen gesetzt")
+        while placed == False:
+            placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
             if direction == 1:  # Rechts
                 for i in range(2):
-                    if random_x >= 10:
+                    if random_x + i > 9:
                         placeable = False
-                    elif Ships_P2[random_y][random_x + j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x + i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -333,10 +361,11 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
                         Ships_P2[random_y][random_x + j] = 1
             elif direction == 2:  # Links
                 for i in range(2):
-                    if random_x <= 0:
+                    if random_x - i < 0:
                         placeable = False
-                    elif Ships_P2[random_y][random_x - j] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y][random_x - i] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
@@ -345,27 +374,30 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 
             elif direction == 3:  # Hoch
                 for i in range(2):
-                    if random_y <= 0:
+                    if random_y - i < 0:
                         placeable = False
-                    elif Ships_P2[random_y + j][random_x] == 1:
-                        placeable = False
-
-                if placeable == True:
-                    placed = True
-                    for j in range(2):
-                        Ships_P2[random_y + j][random_x] = 1
-
-            elif direction == 4:  # Runter
-                for i in range(2):
-                    if random_y >= 10:
-                        placeable = False
-                    elif Ships_P2[random_y - j][random_x] == 1:
-                        placeable = False
+                    else:
+                        if Ships_P2[random_y - i][random_x] == 1:
+                            placeable = False
 
                 if placeable == True:
                     placed = True
                     for j in range(2):
                         Ships_P2[random_y - j][random_x] = 1
+
+            elif direction == 4:  # Runter
+                for i in range(2):
+                    if random_y + i > 9:
+                        placeable = False
+                    else:
+                        if Ships_P2[random_y + i][random_x] == 1:
+                            placeable = False
+
+                if placeable == True:
+                    placed = True
+                    for j in range(2):
+                        Ships_P2[random_y + j][random_x] = 1
+    print("KI Grid:")
     print(Ships_P2)
 
 #Arrays
@@ -422,7 +454,10 @@ while running:
                 x = index[0]
                 y = index[1]
                 if Ship_Size != 0:
-                    visual_array[y][x] = 3
+                    if visual_array[y][x] == 0:
+                        visual_array[y][x] = 3
+                    else:
+                        click_counter = click_counter - 1
                 if click_counter != 10:
                     click_counter = click_counter + 1
 
