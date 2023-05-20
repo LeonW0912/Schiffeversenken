@@ -8,10 +8,9 @@ import time
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.3
+# Version: 0.4
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
-# TODO: Visuelle Darstellung für KI Züge
 # TODO: Evtl. 2 Spielermodus?
 # TODO: PyQt6 Oberfläche als Hauptmenü  und Spielstandsanzeige
 
@@ -160,6 +159,31 @@ def draw_Grid():
                 screen.blit(placeholder, rect)
             else:
                 destroy_Grid()
+
+def draw_KI_Grid():
+    blocksize = 50
+
+    # Layout (A-J & 1-10)
+    font = pygame.font.SysFont(None, 25)
+    for i in range(10):
+        # A-J rechts vom Grid
+        text = font.render(chr(ord('A') + i), True, BLACK)
+        screen.blit(text, (screen_width - 10 * blocksize - 25, i * blocksize + 10))
+
+        # 1-10 unterhalb des Grids
+        text = font.render(str(i + 1), True, BLACK)
+        screen.blit(text, (screen_width - i * blocksize - 30, 10 * blocksize))
+
+    # Grid
+    for x in range(0, 10*blocksize, blocksize):
+        for y in range(0, 10*blocksize, blocksize):
+            rect = pygame.Rect(screen_width-x-blocksize, y, blocksize, blocksize)
+            if visual_array_KI[y//blocksize][x//blocksize] == 0:   #Normales Feld ohne alles
+                pygame.draw.rect(screen, GRAY, rect, 1)
+            elif visual_array_KI[y//blocksize][x//blocksize] == 1: #Feld mit Explosion (also getroffen)
+                screen.blit(exp_image, rect)
+            elif visual_array_KI[y//blocksize][x//blocksize] == 2: #Feld mit Splash (also daneben)
+                screen.blit(spl_image, rect)
 
 def destroy_Grid():
     global visual_array
@@ -423,10 +447,10 @@ def diff_easy():
                 Grid_P2[y][x] = 1
                 Getroffen_P2 = Getroffen_P2 + 1
                 print("... Getroffen!")
-                #Visuelle Darstellung hier
+                visual_array_KI[y][x] = 1
             elif Ships_P1[y][x] == 0:
                 Grid_P2[y][x] = 2
-                #Visuelle Darstellung hier
+                visual_array_KI[y][x] = 2
                 print("... Daneben!")
     # Logik : KI schießt einfach Zufällig auf ein Feld das er noch nicht getroffen hat ohne jegliches Muster oder Algorythmus
 
@@ -439,7 +463,6 @@ def diff_middle():
     global save_x
     global im_alg_getroffen
     global save_richtung
-    global First
 
     while möglich == False:
         if algorithmus == False:
@@ -455,10 +478,10 @@ def diff_middle():
                     algorithmus = True
                     save_x = x
                     save_y = y
-                    # Visuelle Darstellung hier
+                    visual_array_KI[y][x] = 1
                 elif Ships_P1[y][x] == 0:
                     Grid_P2[y][x] = 2
-                    # Visuelle Darstellung hier
+                    visual_array_KI[y][x] = 2
                     print("... Daneben!")
                 break
         elif algorithmus == True:
@@ -473,6 +496,7 @@ def diff_middle():
                                 Grid_P2[save_y][save_x-1] = 1
                                 save_y = save_y
                                 save_x = save_x-1
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -486,6 +510,7 @@ def diff_middle():
                                 Grid_P2[save_y][save_x-1] = 1
                                 save_y = save_y
                                 save_x = save_x - 1
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -505,6 +530,7 @@ def diff_middle():
                                 Grid_P2[save_y][save_x+1] = 1
                                 save_y = save_y
                                 save_x = save_x + 1
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -518,6 +544,7 @@ def diff_middle():
                                 Grid_P2[save_y][save_x+1] = 1
                                 save_y = save_y
                                 save_x = save_x + 1
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -537,6 +564,7 @@ def diff_middle():
                                 Grid_P2[save_y-1][save_x] = 1
                                 save_y = save_y - 1
                                 save_x = save_x
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -550,6 +578,7 @@ def diff_middle():
                                 Grid_P2[save_y-1][save_x] = 1
                                 save_y = save_y - 1
                                 save_x = save_x
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -569,6 +598,7 @@ def diff_middle():
                                 Grid_P2[save_y+1][save_x] = 1
                                 save_y = save_y + 1
                                 save_x = save_x
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -582,6 +612,7 @@ def diff_middle():
                                 Grid_P2[save_y+1][save_x] = 1
                                 save_y = save_y + 1
                                 save_x = save_x
+                                visual_array_KI[save_y][save_x] = 1
                                 break
                             else:
                                 algorithmus = False
@@ -594,6 +625,7 @@ def diff_middle():
             elif im_alg_getroffen == False:
                 while möglich2 == False:
                     richtung = random.randint(1, 4)
+                    print(richtung)
                     #Wenn alle Felder in alle Richtungen blockiert sind:
                     if ((save_x - 1 < 0 or Grid_P2[save_y][save_x - 1] != 0) and  # Links
                         (save_x + 1 >= 10 or Grid_P2[save_y][save_x + 1] != 0) and  # Rechts
@@ -604,7 +636,7 @@ def diff_middle():
                         möglich = True
                         möglich2 = True
                     if richtung == 1: # Links
-                        if save_x-1 <= 0:
+                        if save_x-1 >= 0:
                             if Grid_P2[save_y][save_x - 1] == 0:
                                 print("Ki schießt auf: ", save_y, save_x-1, "...")
                                 möglich2 = True
@@ -613,14 +645,14 @@ def diff_middle():
                                     Grid_P2[save_y][save_x-1] = 1
                                     save_y = save_y
                                     save_x = save_x - 1
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x] = 1
                                     print("... Getroffen!")
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 1
                                 elif Ships_P1[save_y][save_x-1] == 0:
                                     Grid_P2[save_y][save_x - 1] = 2
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x - 1] = 2
                                     print("... Daneben!")
                                 break
                     if richtung == 2: # Rechts
@@ -633,14 +665,14 @@ def diff_middle():
                                     Grid_P2[save_y][save_x+1] = 1
                                     save_y = save_y
                                     save_x = save_x + 1
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x] = 1
                                     print("... Getroffen!")
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 2
                                 elif Ships_P1[save_y][save_x+1] == 0:
                                     Grid_P2[save_y][save_x + 1] = 2
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x + 1] = 2
                                     print("... Daneben!")
                                 break
                     if richtung == 3: # Hoch
@@ -653,18 +685,18 @@ def diff_middle():
                                     Grid_P2[save_y-1][save_x] = 1
                                     save_y = save_y - 1
                                     save_x = save_x
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x] = 1
                                     print("... Getroffen!")
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 3
                                 elif Ships_P1[save_y-1][save_x] == 0:
                                     Grid_P2[save_y-1][save_x] = 2
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y - 1][save_x] = 2
                                     print("... Daneben!")
                                 break
                     if richtung == 4: # Runter
-                        if save_y+1 > 10:
+                        if save_y+1 < 10:
                             if Grid_P2[save_y+1][save_x] == 0:
                                 print("Ki schießt auf: ", save_y+1, save_x, "...")
                                 möglich2 = True
@@ -673,14 +705,14 @@ def diff_middle():
                                     Grid_P2[save_y+1][save_x] = 1
                                     save_y = save_y+1
                                     save_x = save_x
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y][save_x] = 1
                                     print("... Getroffen!")
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 4
                                 elif Ships_P1[save_y+1][save_x] == 0:
                                     Grid_P2[save_y+1][save_x] = 2
-                                    #Visuelle Darstellung hier
+                                    visual_array_KI[save_y + 1][save_x] = 2
                                     print("... Daneben!")
                                 break
     # Logik: Die KI schießt auf ein Zufälliges Feld bis er etwas getroffen hat danach geht er in eine Zufällige Richtung
@@ -704,7 +736,7 @@ def diff_hard():
                     ist_richtig = True
                     möglich = True
                     Grid_P2[y][x] = 1
-                    # Visuelle Darstellung hier
+                    visual_array_KI[y][x] = 1
         else: # 25% Chance auf Daneben
             while ist_richtig == False:
                 x = random.randint(0, 9)
@@ -715,11 +747,12 @@ def diff_hard():
                     ist_richtig = True
                     möglich = True
                     Grid_P2[y][x] = 2
-                    # Visuelle Darstellung hier
+                    visual_array_KI[y][x] = 2
     # Logik: Die KI hat eine 85% Chance immer ein Feld zu treffen auf der ein Schiff ist am sonsten ist es ein anderes
 
 #Arrays
-visual_array = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung
+visual_array = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung des Spielers
+visual_array_KI = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung der KI
 Ships_P1 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P1
 Ships_P2 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P2
 Grid_P1 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben P1
@@ -791,7 +824,6 @@ while running:
                             click_counter = click_counter - 1
                     if click_counter != 10:
                         click_counter = click_counter + 1
-
                     if click_counter == 2:
                         Ship_Size = 4
                     elif click_counter == 4:
@@ -844,6 +876,8 @@ while running:
     if button is not None:
         button.draw(screen)
     draw_Grid()
+    if Mode == 2:
+        draw_KI_Grid()
 
     def closeEvent(self, event): #Schließevent für beides
         pygame.quit()
