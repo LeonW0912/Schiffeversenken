@@ -5,6 +5,16 @@ import sys
 import random
 import time
 
+########################################################################################################################
+#                                              Schiffe Versenken by Leon Walter                                        #
+########################################################################################################################
+# Version: 0.3
+#
+# TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
+# TODO: Visuelle Darstellung für KI Züge
+# TODO: Evtl. 2 Spielermodus?
+# TODO: PyQt6 Oberfläche als Hauptmenü  und Spielstandsanzeige
+
 class Button:
     def __init__(self, x, y, width, height, color, text=''):
         self.rect = pygame.Rect(x, y, width, height)
@@ -197,21 +207,21 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 
         elif direction == 3: # Hoch
             for i in range(5):
-                if random_y  + i <= 0:
-                    placeable = False
-            if placeable == True:
-                placed = True
-                for j in range(5):
-                    Ships_P2[random_y + j][random_x] = 1
-
-        elif direction == 4: # Runter
-            for i in range(5):
-                if random_y - i > 9:
+                if random_y - i <= 0:
                     placeable = False
             if placeable == True:
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y - j][random_x] = 1
+
+        elif direction == 4: # Runter
+            for i in range(5):
+                if random_y + i > 9:
+                    placeable = False
+            if placeable == True:
+                placed = True
+                for j in range(5):
+                    Ships_P2[random_y + j][random_x] = 1
     done_counter = done_counter + 1
     print(str(done_counter) + "/10 Schiffen gesetzt")
 
@@ -400,6 +410,314 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
     print("KI Grid:")
     print(Ships_P2)
 
+def diff_easy():
+    möglich = False
+    global Getroffen_P2
+    while möglich == False:
+        x = random.randint(0, 9)
+        y = random.randint(0, 9)
+        if Grid_P2[y][x] == 0:
+            möglich = True
+            print("Ki schießt auf: ", y, x, "...")
+            if Ships_P1[y][x] == 1:
+                Grid_P2[y][x] = 1
+                Getroffen_P2 = Getroffen_P2 + 1
+                print("... Getroffen!")
+                #Visuelle Darstellung hier
+            elif Ships_P1[y][x] == 0:
+                Grid_P2[y][x] = 2
+                #Visuelle Darstellung hier
+                print("... Daneben!")
+    # Logik : KI schießt einfach Zufällig auf ein Feld das er noch nicht getroffen hat ohne jegliches Muster oder Algorythmus
+
+def diff_middle():
+    möglich = False
+    möglich2 = False
+    global algorithmus
+    global Getroffen_P2
+    global save_y
+    global save_x
+    global im_alg_getroffen
+    global save_richtung
+    global First
+
+    while möglich == False:
+        if algorithmus == False:
+            x = random.randint(0, 9)
+            y = random.randint(0, 9)
+            if Grid_P2[y][x] == 0:
+                möglich = True
+                print("Ki schießt auf: ", y, x, "...")
+                if Ships_P1[y][x] == 1:
+                    Grid_P2[y][x] = 1
+                    Getroffen_P2 = Getroffen_P2 + 1
+                    print("... Getroffen!")
+                    algorithmus = True
+                    save_x = x
+                    save_y = y
+                    # Visuelle Darstellung hier
+                elif Ships_P1[y][x] == 0:
+                    Grid_P2[y][x] = 2
+                    # Visuelle Darstellung hier
+                    print("... Daneben!")
+                break
+        elif algorithmus == True:
+            if im_alg_getroffen == True:
+                if save_richtung == 1:  #LI
+                    if save_x-1 >= 0:
+                        if Ships_P2[save_y][save_x-1] == 1:
+                            if Grid_P2[save_y][save_x-1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x-1, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y][save_x-1] = 1
+                                save_y = save_y
+                                save_x = save_x-1
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                        else:
+                            if Grid_P2[save_y][save_x-1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x-1, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y][save_x-1] = 1
+                                save_y = save_y
+                                save_x = save_x - 1
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                    else:
+                        algorithmus = False
+                        diff_middle()
+                        möglich = True
+                elif save_richtung == 2:#RE
+                    if save_x+1 < 10:
+                        if Ships_P2[save_y][save_x+1] == 1:
+                            if Grid_P2[save_y][save_x+1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x+1, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y][save_x+1] = 1
+                                save_y = save_y
+                                save_x = save_x + 1
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                        else:
+                            if Grid_P2[save_y][save_x+1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x+1, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y][save_x+1] = 1
+                                save_y = save_y
+                                save_x = save_x + 1
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                    else:
+                        algorithmus = False
+                        diff_middle()
+                        möglich = True
+                elif save_richtung == 3:#HO
+                    if save_y-1 >= 0:
+                        if Ships_P2[save_y-1][save_x] == 1:
+                            if Grid_P2[save_y-1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y-1, save_x, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y-1][save_x] = 1
+                                save_y = save_y - 1
+                                save_x = save_x
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                        else:
+                            if Grid_P2[save_y-1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y-1, save_x, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y-1][save_x] = 1
+                                save_y = save_y - 1
+                                save_x = save_x
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                    else:
+                        algorithmus = False
+                        diff_middle()
+                        möglich = True
+                elif save_richtung == 4:#RU
+                    if save_y+1 < 10:
+                        if Ships_P2[save_y+1][save_x] == 1:
+                            if Grid_P2[save_y-1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y+1, save_x, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y+1][save_x] = 1
+                                save_y = save_y + 1
+                                save_x = save_x
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                        else:
+                            if Grid_P2[save_y+1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y+1, save_x, "...")
+                                print("... Getroffen!")
+                                Getroffen_P2 = Getroffen_P2 + 1
+                                Grid_P2[save_y+1][save_x] = 1
+                                save_y = save_y + 1
+                                save_x = save_x
+                                break
+                            else:
+                                algorithmus = False
+                                diff_middle()
+                                möglich = True
+                    else:
+                        algorithmus = False
+                        diff_middle()
+                        möglich = True
+            elif im_alg_getroffen == False:
+                while möglich2 == False:
+                    richtung = random.randint(1, 4)
+                    #Wenn alle Felder in alle Richtungen blockiert sind:
+                    if ((save_x - 1 < 0 or Grid_P2[save_y][save_x - 1] != 0) and  # Links
+                        (save_x + 1 >= 10 or Grid_P2[save_y][save_x + 1] != 0) and  # Rechts
+                        (save_y - 1 < 0 or Grid_P2[save_y - 1][save_x] != 0) and  # Hoch
+                        (save_y + 1 >= 10 or Grid_P2[save_y + 1][save_x] != 0)):  # Runter
+                        algorithmus = False
+                        diff_middle()
+                        möglich = True
+                        möglich2 = True
+                    if richtung == 1: # Links
+                        if save_x-1 <= 0:
+                            if Grid_P2[save_y][save_x - 1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x-1, "...")
+                                möglich2 = True
+                                möglich = True
+                                if Ships_P1[save_y][save_x-1] == 1:
+                                    Grid_P2[save_y][save_x-1] = 1
+                                    save_y = save_y
+                                    save_x = save_x - 1
+                                    #Visuelle Darstellung hier
+                                    print("... Getroffen!")
+                                    Getroffen_P2 = Getroffen_P2 + 1
+                                    im_alg_getroffen = True
+                                    save_richtung = 1
+                                elif Ships_P1[save_y][save_x-1] == 0:
+                                    Grid_P2[save_y][save_x - 1] = 2
+                                    #Visuelle Darstellung hier
+                                    print("... Daneben!")
+                                break
+                    if richtung == 2: # Rechts
+                        if save_x+1 < 10:
+                            if Grid_P2[save_y][save_x + 1] == 0:
+                                print("Ki schießt auf: ", save_y, save_x+1, "...")
+                                möglich2 = True
+                                möglich = True
+                                if Ships_P1[save_y][save_x+1] == 1:
+                                    Grid_P2[save_y][save_x+1] = 1
+                                    save_y = save_y
+                                    save_x = save_x + 1
+                                    #Visuelle Darstellung hier
+                                    print("... Getroffen!")
+                                    Getroffen_P2 = Getroffen_P2 + 1
+                                    im_alg_getroffen = True
+                                    save_richtung = 2
+                                elif Ships_P1[save_y][save_x+1] == 0:
+                                    Grid_P2[save_y][save_x + 1] = 2
+                                    #Visuelle Darstellung hier
+                                    print("... Daneben!")
+                                break
+                    if richtung == 3: # Hoch
+                        if save_y-1 >= 0:
+                            if Grid_P2[save_y-1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y-1, save_x, "...")
+                                möglich2 = True
+                                möglich = True
+                                if Ships_P1[save_y-1][save_x] == 1:
+                                    Grid_P2[save_y-1][save_x] = 1
+                                    save_y = save_y - 1
+                                    save_x = save_x
+                                    #Visuelle Darstellung hier
+                                    print("... Getroffen!")
+                                    Getroffen_P2 = Getroffen_P2 + 1
+                                    im_alg_getroffen = True
+                                    save_richtung = 3
+                                elif Ships_P1[save_y-1][save_x] == 0:
+                                    Grid_P2[save_y-1][save_x] = 2
+                                    #Visuelle Darstellung hier
+                                    print("... Daneben!")
+                                break
+                    if richtung == 4: # Runter
+                        if save_y+1 > 10:
+                            if Grid_P2[save_y+1][save_x] == 0:
+                                print("Ki schießt auf: ", save_y+1, save_x, "...")
+                                möglich2 = True
+                                möglich = True
+                                if Ships_P1[save_y+1][save_x] == 1:
+                                    Grid_P2[save_y+1][save_x] = 1
+                                    save_y = save_y+1
+                                    save_x = save_x
+                                    #Visuelle Darstellung hier
+                                    print("... Getroffen!")
+                                    Getroffen_P2 = Getroffen_P2 + 1
+                                    im_alg_getroffen = True
+                                    save_richtung = 4
+                                elif Ships_P1[save_y+1][save_x] == 0:
+                                    Grid_P2[save_y+1][save_x] = 2
+                                    #Visuelle Darstellung hier
+                                    print("... Daneben!")
+                                break
+    # Logik: Die KI schießt auf ein Zufälliges Feld bis er etwas getroffen hat danach geht er in eine Zufällige Richtung
+    # ausgehend von dem Feld das er getroffen hat und schießt sofern es geht solange in die Richtung weiter bis entweder
+    # das Ende erreicht ist, etwas blockiert oder Kein Schiff mehr da ist.
+
+def diff_hard():
+    möglich = False
+    global Getroffen_P2
+    while möglich == False:
+        treffwahrscheinlichkeit = random.randint(1, 100)
+        ist_richtig = False
+        if treffwahrscheinlichkeit < 86: # 85% Chance das er Trifft
+            while ist_richtig == False:
+                x = random.randint(0, 9)
+                y = random.randint(0, 9)
+                if Ships_P1[y][x] == 1:
+                    print("Ki schießt auf: ", y, x, "...")
+                    print("... Getroffen!")
+                    Getroffen_P2 = Getroffen_P2 + 1
+                    ist_richtig = True
+                    möglich = True
+                    Grid_P2[y][x] = 1
+                    # Visuelle Darstellung hier
+        else: # 25% Chance auf Daneben
+            while ist_richtig == False:
+                x = random.randint(0, 9)
+                y = random.randint(0, 9)
+                if Ships_P1[y][x] == 0:
+                    print("Ki schießt auf: ", y, x, "...")
+                    print("... Daneben!")
+                    ist_richtig = True
+                    möglich = True
+                    Grid_P2[y][x] = 2
+                    # Visuelle Darstellung hier
+    # Logik: Die KI hat eine 85% Chance immer ein Feld zu treffen auf der ein Schiff ist am sonsten ist es ein anderes
+
 #Arrays
 visual_array = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung
 Ships_P1 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P1
@@ -415,6 +733,16 @@ pygame.display.set_caption("Schiffe versenken by Leon Walter")
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 running = True
+möglich = False
+algorithmus = False
+im_alg_getroffen = False
+save_x = 0
+save_y = 0
+save_richtung = 0
+Mode = 1
+difficulty = 2
+Getroffen_P1 = 0
+Getroffen_P2 = 0
 
 # Variablen die für den Button gebraucht werden
 button_width = 200
@@ -447,27 +775,57 @@ while running:
                         visual_array = np.zeros((10, 10), dtype=int)
                         button = None
                         generate_random_grid()
+                        Mode = 2
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
-            index = get_clicked_index(event.pos)
-            if index is not None:
-                x = index[0]
-                y = index[1]
-                if Ship_Size != 0:
-                    if visual_array[y][x] == 0:
-                        visual_array[y][x] = 3
-                    else:
-                        click_counter = click_counter - 1
-                if click_counter != 10:
-                    click_counter = click_counter + 1
 
-                if click_counter == 2:
-                    Ship_Size = 4
-                elif click_counter == 4:
-                    Ship_Size = 3
-                elif click_counter == 7:
-                    Ship_Size = 2
-                #Wird Ausgeführt BEVOR das ins array geht deswegen wann geschieht es + 1
+            if Mode == 1: # Schiffsetzung
+                index = get_clicked_index(event.pos)
+                if index is not None:
+                    x = index[0]
+                    y = index[1]
+                    if Ship_Size != 0:
+                        if visual_array[y][x] == 0:
+                            visual_array[y][x] = 3
+                        else:
+                            click_counter = click_counter - 1
+                    if click_counter != 10:
+                        click_counter = click_counter + 1
+
+                    if click_counter == 2:
+                        Ship_Size = 4
+                    elif click_counter == 4:
+                        Ship_Size = 3
+                    elif click_counter == 7:
+                        Ship_Size = 2
+                    #Wird Ausgeführt BEVOR das ins array geht deswegen wann geschieht es + 1
+            elif Mode == 2: # Spielverlauf
+                index = get_clicked_index(event.pos)
+                print(Getroffen_P2)
+                if Getroffen_P1 == 30:
+                    print("Spieler 1 hat gewonnen")
+                    Mode = 3
+                elif Getroffen_P2 == 30:
+                    print("Spieler 2 hat gewonnen")
+                    Mode = 3
+
+                if index is not None:
+                    x = index[0]
+                    y = index[1]
+                    if Ships_P2[y][x] == 1:
+                        visual_array[y][x] = 1 # Getroffen
+                        Grid_P1[y][x] = 1
+                        Getroffen_P1 = Getroffen_P1 + 1
+                    else:
+                        visual_array[y][x] = 2 # Daneben
+                        Grid_P1[y][x] = 2
+                    if Getroffen_P2 < 30:
+                        if difficulty == 1:
+                            diff_easy()
+                        elif difficulty == 2:
+                            diff_middle()
+                        elif difficulty == 3:
+                            diff_hard()
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
