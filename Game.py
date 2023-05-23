@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout
 import sys
 import random
 import time
@@ -8,7 +8,7 @@ import time
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.4
+# Version: 0.5
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
@@ -30,6 +30,57 @@ class Button:
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
+def QT_button_clicked():
+    sender = window.sender()
+    # Alle Buttons auf Standardfarbe zurücksetzen
+    button_easy.setStyleSheet('''
+    QPushButton {
+        background-color: #50C878;
+        border-radius: 10px
+    }
+    QPushButton:hover {
+        background-color: #3CB371;
+    }
+    ''')
+    button_medium.setStyleSheet('''
+    QPushButton {
+        background-color: #50C878;
+        border-radius: 10px
+    }
+    QPushButton:hover {
+        background-color: #3CB371;
+    }
+    ''')
+    button_hard.setStyleSheet('''
+    QPushButton {
+        background-color: #50C878;
+        border-radius: 10px
+    }
+    QPushButton:hover {
+        background-color: #3CB371;
+    }
+    ''')
+    # Hintergrundfarbe des geklickten Buttons ändern
+    sender.setStyleSheet('''
+    QPushButton {
+        background-color: yellow;
+        border-radius: 10px   
+    }
+    QPushButton:hover {
+        background-color: #D4B85D;
+    }
+    ''')
+    if sender.text() == "Einfach":
+        print("Einfach ausgewählt")
+        difficulty = 1
+    elif sender.text() == "Mittel":
+        print("Mittel ausgewählt")
+        difficulty = 2
+    elif sender.text() == "Schwer":
+        print("Schwer ausgewählt")
+        difficulty = 3
+
+
 # Alle Benötigten Variablen
 WHITE = pygame.Color("WHITE")
 GRAY = pygame.Color("GRAY")
@@ -43,17 +94,40 @@ check_var = False
 app = QApplication(sys.argv)
 window = QMainWindow()
 widget = QWidget()
-layout = QHBoxLayout(widget)
-button = QPushButton("Test")
+layout = QVBoxLayout(widget)
 
-layout.addWidget(button)
+button_easy = QPushButton("Einfach")
+button_medium = QPushButton("Mittel")
+button_hard = QPushButton("Schwer")
+
+button_easy.setFixedHeight(50)  # Höhe des Buttons "Einfach" auf 50 Pixel setzen
+button_medium.setFixedHeight(50)  # Höhe des Buttons "Mittel" auf 50 Pixel setzen
+button_hard.setFixedHeight(50)  # Höhe des Buttons "Schwer" auf 50 Pixel setzen
+
+app.setStyleSheet('''
+    QPushButton {
+        background-color: #50C878;
+        border-radius: 10px
+    }
+    QPushButton:hover {
+        background-color: #3CB371;
+    }
+    ''')
+button_medium.setStyleSheet("background-color: yellow;")
+
+button_easy.clicked.connect(QT_button_clicked)
+button_medium.clicked.connect(QT_button_clicked)
+button_hard.clicked.connect(QT_button_clicked)
+
+layout.addWidget(button_easy)
+layout.addWidget(button_medium)
+layout.addWidget(button_hard)
+
 widget.setLayout(layout)
 window.setCentralWidget(widget)
 window.setGeometry(100, 100, 300, 300)
-button.setGeometry(100, 125, 100, 50)
 
 window.show()
-
 pygame.init()
 
 def draw_Grid():
@@ -809,6 +883,11 @@ while running:
                         button = None
                         generate_random_grid()
                         Mode = 2
+                        #PyQt6 Teil:
+                        layout.removeWidget(button_easy)
+                        layout.removeWidget(button_medium)
+                        layout.removeWidget(button_hard)
+                        widget.setLayout(layout)
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
 
