@@ -8,7 +8,7 @@ import time
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.5
+# Version: 0.6
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
@@ -31,6 +31,7 @@ class Button:
         return self.rect.collidepoint(pos)
 
 def QT_button_clicked():
+    global difficulty
     sender = window.sender()
     # Alle Buttons auf Standardfarbe zurücksetzen
     button_easy.setStyleSheet('''
@@ -63,11 +64,11 @@ def QT_button_clicked():
     # Hintergrundfarbe des geklickten Buttons ändern
     sender.setStyleSheet('''
     QPushButton {
-        background-color: yellow;
+        background-color: #FFFF00;
         border-radius: 10px   
     }
     QPushButton:hover {
-        background-color: #D4B85D;
+        background-color: #FFD700;
     }
     ''')
     if sender.text() == "Einfach":
@@ -113,7 +114,16 @@ app.setStyleSheet('''
         background-color: #3CB371;
     }
     ''')
-button_medium.setStyleSheet("background-color: yellow;")
+button_medium.setStyleSheet('''
+    QPushButton {
+        background-color: #FFFF00;
+        border-radius: 10px   
+    }
+    QPushButton:hover {
+        background-color: #FFD700;
+    }
+    ''')
+difficulty = 2
 
 button_easy.clicked.connect(QT_button_clicked)
 button_medium.clicked.connect(QT_button_clicked)
@@ -847,7 +857,6 @@ save_x = 0
 save_y = 0
 save_richtung = 0
 Mode = 1
-difficulty = 2
 Getroffen_P1 = 0
 Getroffen_P2 = 0
 
@@ -911,6 +920,7 @@ while running:
                         Ship_Size = 2
                     #Wird Ausgeführt BEVOR das ins array geht deswegen wann geschieht es + 1
             elif Mode == 2: # Spielverlauf
+                möglich2 = False
                 index = get_clicked_index(event.pos)
                 print(Getroffen_P2)
                 if Getroffen_P1 == 30:
@@ -923,20 +933,25 @@ while running:
                 if index is not None:
                     x = index[0]
                     y = index[1]
-                    if Ships_P2[y][x] == 1:
-                        visual_array[y][x] = 1 # Getroffen
-                        Grid_P1[y][x] = 1
-                        Getroffen_P1 = Getroffen_P1 + 1
+                    if Grid_P1[y][x] == 0:
+                        möglich2 = True
+                        if Ships_P2[y][x] == 1:
+                            visual_array[y][x] = 1 # Getroffen
+                            Grid_P1[y][x] = 1
+                            Getroffen_P1 = Getroffen_P1 + 1
+                        else:
+                            visual_array[y][x] = 2 # Daneben
+                            Grid_P1[y][x] = 2
                     else:
-                        visual_array[y][x] = 2 # Daneben
-                        Grid_P1[y][x] = 2
-                    if Getroffen_P2 < 30:
-                        if difficulty == 1:
-                            diff_easy()
-                        elif difficulty == 2:
-                            diff_middle()
-                        elif difficulty == 3:
-                            diff_hard()
+                        print("Auf dieses Feld wurde schon geschossen")
+                    if möglich2 == True:
+                        if Getroffen_P2 < 30:
+                            if difficulty == 1:
+                                diff_easy()
+                            elif difficulty == 2:
+                                diff_middle()
+                            elif difficulty == 3:
+                                diff_hard()
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
