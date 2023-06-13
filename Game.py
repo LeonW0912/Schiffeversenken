@@ -8,11 +8,11 @@ import time
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.6
+# Version: 0.8
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
-# TODO: PyQt6 Oberfläche als Hauptmenü
+# TODO: PyQt6 Oberfläche als Hauptmenü?
 
 class Button:
     def __init__(self, x, y, width, height, color, text=''):
@@ -942,10 +942,13 @@ while running:
                         KI_text = QLabel("KI Fortschritt")
                         Progress_KI = QProgressBar()
                         Progress_KI.setFixedHeight(20)
+                        layout.addSpacing(50)
                         layout.addWidget(Spieler_text)
                         layout.addWidget(Progress_Player)
+                        layout.addSpacing(50)
                         layout.addWidget(KI_text)
                         layout.addWidget(Progress_KI)
+                        layout.addStretch()
                         layout.update()
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
