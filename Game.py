@@ -1,14 +1,15 @@
 import pygame
 import numpy as np
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox
 import sys
 import random
+import pymsgbox
 import time
 
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.8
+# Version: 0.9
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
@@ -189,6 +190,7 @@ def draw_Grid():
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
+                        pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 2: # Links
                     check_var = False
                     for i in range(Ship_Size):
@@ -205,6 +207,7 @@ def draw_Grid():
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
+                        pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 3:  # Hoch
                     check_var = False
                     for i in range(Ship_Size):
@@ -222,6 +225,7 @@ def draw_Grid():
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
+                        pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 4: # Runter
                     check_var = False
                     for i in range(Ship_Size):
@@ -237,7 +241,7 @@ def draw_Grid():
                     else:
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
-
+                        pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 if click_counter == 10:
                     Ship_Size = 0
             elif visual_array[y//blocksize][x//blocksize] == 4: # Überprüfung Treffer / Daneben
@@ -952,6 +956,7 @@ while running:
                         layout.update()
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
+                        pymsgbox.alert(str("Es sind noch nicht alle Schiffe platziert!"), "Fehler 02", button="OK")
 
             if Mode == 1: # Schiffsetzung
                 index = get_clicked_index(event.pos)
@@ -999,6 +1004,8 @@ while running:
                             Grid_P1[y][x] = 2
                     else:
                         print("Auf dieses Feld wurde schon geschossen")
+                        pymsgbox.alert(str("Auf dieses Feld wurde schon geschossen!"), "Fehler 03", button="OK")
+
                     if möglich2 == True:
                         if Getroffen_P2 < 30:
                             if difficulty == 1:
