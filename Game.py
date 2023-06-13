@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel
 import sys
 import random
 import time
@@ -12,7 +12,7 @@ import time
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
-# TODO: PyQt6 Oberfläche als Hauptmenü  und Spielstandsanzeige
+# TODO: PyQt6 Oberfläche als Hauptmenü
 
 class Button:
     def __init__(self, x, y, width, height, color, text=''):
@@ -112,6 +112,9 @@ app.setStyleSheet('''
     }
     QPushButton:hover {
         background-color: #3CB371;
+    }
+    QProgressBar {
+        background-color: gray;
     }
     ''')
 button_medium.setStyleSheet('''
@@ -532,6 +535,8 @@ def diff_easy():
                 Getroffen_P2 = Getroffen_P2 + 1
                 print("... Getroffen!")
                 visual_array_KI[y][x] = 1
+                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                layout.update()
             elif Ships_P1[y][x] == 0:
                 Grid_P2[y][x] = 2
                 visual_array_KI[y][x] = 2
@@ -563,6 +568,8 @@ def diff_middle():
                     save_x = x
                     save_y = y
                     visual_array_KI[y][x] = 1
+                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                    layout.update()
                 elif Ships_P1[y][x] == 0:
                     Grid_P2[y][x] = 2
                     visual_array_KI[y][x] = 2
@@ -581,6 +588,8 @@ def diff_middle():
                                 save_y = save_y
                                 save_x = save_x-1
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -595,6 +604,8 @@ def diff_middle():
                                 save_y = save_y
                                 save_x = save_x - 1
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -615,6 +626,8 @@ def diff_middle():
                                 save_y = save_y
                                 save_x = save_x + 1
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -629,6 +642,8 @@ def diff_middle():
                                 save_y = save_y
                                 save_x = save_x + 1
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -649,6 +664,8 @@ def diff_middle():
                                 save_y = save_y - 1
                                 save_x = save_x
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -663,6 +680,8 @@ def diff_middle():
                                 save_y = save_y - 1
                                 save_x = save_x
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -683,6 +702,8 @@ def diff_middle():
                                 save_y = save_y + 1
                                 save_x = save_x
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -697,6 +718,8 @@ def diff_middle():
                                 save_y = save_y + 1
                                 save_x = save_x
                                 visual_array_KI[save_y][save_x] = 1
+                                Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                layout.update()
                                 break
                             else:
                                 algorithmus = False
@@ -734,6 +757,8 @@ def diff_middle():
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 1
+                                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                    layout.update()
                                 elif Ships_P1[save_y][save_x-1] == 0:
                                     Grid_P2[save_y][save_x - 1] = 2
                                     visual_array_KI[save_y][save_x - 1] = 2
@@ -754,6 +779,8 @@ def diff_middle():
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 2
+                                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                    layout.update()
                                 elif Ships_P1[save_y][save_x+1] == 0:
                                     Grid_P2[save_y][save_x + 1] = 2
                                     visual_array_KI[save_y][save_x + 1] = 2
@@ -774,6 +801,8 @@ def diff_middle():
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 3
+                                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                    layout.update()
                                 elif Ships_P1[save_y-1][save_x] == 0:
                                     Grid_P2[save_y-1][save_x] = 2
                                     visual_array_KI[save_y - 1][save_x] = 2
@@ -794,6 +823,8 @@ def diff_middle():
                                     Getroffen_P2 = Getroffen_P2 + 1
                                     im_alg_getroffen = True
                                     save_richtung = 4
+                                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                                    layout.update()
                                 elif Ships_P1[save_y+1][save_x] == 0:
                                     Grid_P2[save_y+1][save_x] = 2
                                     visual_array_KI[save_y + 1][save_x] = 2
@@ -821,6 +852,8 @@ def diff_hard():
                     möglich = True
                     Grid_P2[y][x] = 1
                     visual_array_KI[y][x] = 1
+                    Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
+                    layout.update()
         else: # 25% Chance auf Daneben
             while ist_richtig == False:
                 x = random.randint(0, 9)
@@ -892,11 +925,28 @@ while running:
                         button = None
                         generate_random_grid()
                         Mode = 2
-                        #PyQt6 Teil:
+                        # PyQt6 Teil:
+                        # Entfernt die Buttons aus dem Layout nachdem das Spiel begonnen hat
                         layout.removeWidget(button_easy)
+                        button_easy.setParent(None)
                         layout.removeWidget(button_medium)
+                        button_medium.setParent(None)
                         layout.removeWidget(button_hard)
-                        widget.setLayout(layout)
+                        button_hard.setParent(None)
+                        layout.update()
+                        layout.setContentsMargins(0, -10, 0, -10)
+                        layout.setSpacing(5)
+                        Spieler_text = QLabel("Spieler Fortschritt")
+                        Progress_Player = QProgressBar()
+                        Progress_Player.setFixedHeight(20)
+                        KI_text = QLabel("KI Fortschritt")
+                        Progress_KI = QProgressBar()
+                        Progress_KI.setFixedHeight(20)
+                        layout.addWidget(Spieler_text)
+                        layout.addWidget(Progress_Player)
+                        layout.addWidget(KI_text)
+                        layout.addWidget(Progress_KI)
+                        layout.update()
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
 
@@ -939,6 +989,8 @@ while running:
                             visual_array[y][x] = 1 # Getroffen
                             Grid_P1[y][x] = 1
                             Getroffen_P1 = Getroffen_P1 + 1
+                            Progress_Player.setValue(round(Getroffen_P1 / 30 * 100))
+                            layout.update()
                         else:
                             visual_array[y][x] = 2 # Daneben
                             Grid_P1[y][x] = 2
