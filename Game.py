@@ -1,3 +1,5 @@
+import os.path
+
 import pygame
 import numpy as np
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox
@@ -9,11 +11,12 @@ import time
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.9
+# Version: 0.10
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus?
-# TODO: PyQt6 Oberfläche als Hauptmenü?
+# TODO: Evtl. Online Multiplayer?
+# TODO: evtl. Header für PyQT6
 
 class Button:
     def __init__(self, x, y, width, height, color, text=''):
@@ -84,28 +87,32 @@ def QT_button_clicked():
 
 
 # Alle Benötigten Variablen
+# pygame Farben:
 WHITE = pygame.Color("WHITE")
 GRAY = pygame.Color("GRAY")
 BLACK = pygame.Color("BLACK")
-Ship_Size = 5
-click_counter = 0
+MEERBLAU = pygame.Color(37,59,98)
+# Allgemeinere Variablen:
+Ship_Size = 5 # Aktuelle Schiffsgröße bei Schiffssetzung (für die Schleifen)
+click_counter = 0 # Zählt hoch wenn ein Schiff erfolgreich platziert wurde
 richtung = 4 #1 Links 2 Rechts 3 Hoch 4 Runter
-check_var = False
+check_var = False # Für Gewisse Funktionen
 
 #PyQt6
+# Grundlegende Dinge Wie die App, das Fenster usw.
 app = QApplication(sys.argv)
 window = QMainWindow()
 widget = QWidget()
 layout = QVBoxLayout(widget)
 
-button_easy = QPushButton("Einfach")
-button_medium = QPushButton("Mittel")
-button_hard = QPushButton("Schwer")
+button_easy = QPushButton("Einfach") # Einfacher Schwierigkeitsbutton
+button_medium = QPushButton("Mittel") # Mittlerer Schwierigkeitsbutton
+button_hard = QPushButton("Schwer") # Schwerer Schwierigkeitsbutton
 
 button_easy.setFixedHeight(50)  # Höhe des Buttons "Einfach" auf 50 Pixel setzen
 button_medium.setFixedHeight(50)  # Höhe des Buttons "Mittel" auf 50 Pixel setzen
 button_hard.setFixedHeight(50)  # Höhe des Buttons "Schwer" auf 50 Pixel setzen
-
+# Gestaltung der Buttons mittels QSS
 app.setStyleSheet('''
     QPushButton {
         background-color: #50C878;
@@ -118,6 +125,7 @@ app.setStyleSheet('''
         background-color: gray;
     }
     ''')
+# andere Farbe für Medium Button da er standardmäßig ausgewählt ist
 button_medium.setStyleSheet('''
     QPushButton {
         background-color: #FFFF00;
@@ -127,20 +135,24 @@ button_medium.setStyleSheet('''
         background-color: #FFD700;
     }
     ''')
-difficulty = 2
+difficulty = 2 # Standard Schwierigkeit Mittel
 
+# Die Funktion für wenn der Button geklickt wurde anbinden
 button_easy.clicked.connect(QT_button_clicked)
 button_medium.clicked.connect(QT_button_clicked)
 button_hard.clicked.connect(QT_button_clicked)
 
+# Buttons zum Widget hinzufügen
 layout.addWidget(button_easy)
 layout.addWidget(button_medium)
 layout.addWidget(button_hard)
 
+# Allgemeine Layout / Widget Einstellungen
 widget.setLayout(layout)
 window.setCentralWidget(widget)
 window.setGeometry(100, 100, 300, 300)
 
+# Zeige das Fenster und Initialisiere PyGame
 window.show()
 pygame.init()
 
@@ -871,7 +883,7 @@ def diff_hard():
                     visual_array_KI[y][x] = 2
     # Logik: Die KI hat eine 85% Chance immer ein Feld zu treffen auf der ein Schiff ist am sonsten ist es ein anderes
 
-#Arrays
+#Array Variaben
 visual_array = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung des Spielers
 visual_array_KI = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung der KI
 Ships_P1 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P1
@@ -880,37 +892,38 @@ Grid_P1 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben P1
 Grid_P2 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben P2
 
 #PyGame Variablen
-FPS = 20
-screen_width = 1280
-screen_height = 550
-pygame.display.set_caption("Schiffe versenken by Leon Walter")
-screen = pygame.display.set_mode((screen_width, screen_height))
+FPS = 20 # FPS (selbsterklärend)
+screen_width = 1280 #ScreenBreite
+screen_height = 550 #ScreenHöhe
+pygame.display.set_caption("Schiffe versenken by Leon Walter") #Fenstertitel
+screen = pygame.display.set_mode((screen_width, screen_height)) #Breite/Höhe es Fensters setzen
 clock = pygame.time.Clock()
-running = True
-möglich = False
-algorithmus = False
-im_alg_getroffen = False
-save_x = 0
-save_y = 0
-save_richtung = 0
-Mode = 1
-Getroffen_P1 = 0
-Getroffen_P2 = 0
+running = True #Läuft das Spiel Bedingungsvariable
+möglich = False #Ist die Schiffsplatzierung möglich Bedingungsvariable
+algorithmus = False #algorithmusvariable für Schleife
+im_alg_getroffen = False # s. o.
+save_x = 0 # Für Algorihtmus
+save_y = 0 # s. o.
+save_richtung = 0 #s.o.
+Mode = 1 # Modus (1=Schiffssetzung; 2=Spielverlauf 3=Nichts)
+Getroffen_P1 = 0 #Anzahl getroffene Schiffsfelder Spieler 1
+Getroffen_P2 = 0 #Anzahl getroffene Schiffsfelder Spieler 2
 
 # Variablen die für den Button gebraucht werden
-button_width = 200
-button_height = 50
-button_x = (screen_width - button_width) // 2 + 25
-button_y = (screen_height - button_height) // 2
-button = Button(button_x, button_y, button_width, button_height, (255, 0, 0), "Feld abgeben")
+button_width = 200 #BreiteButton
+button_height = 50 #HöheButton
+button_x = (screen_width - button_width) // 2 + 25 #Positionierung des Buttons in X
+button_y = (screen_height - button_height) // 2 #Positionierung des Buttons in Y
+button = Button(button_x, button_y, button_width, button_height, (255, 0, 0), "Feld abgeben") #Buttonvariable
 
 # Bildvariablen
-exp_image = pygame.image.load('explosion.jpg')
-spl_image = pygame.image.load('splash.jpg')
-placeholder = pygame.image.load('PlaceHolder.png')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+exp_image = pygame.image.load(current_dir + '\explosion.jpg')
+spl_image = pygame.image.load(current_dir + '\splash.jpg')
+placeholder = pygame.image.load(current_dir + '\PlaceHolder.png')
 
 while running:
-    screen.fill((255, 255, 255))
+    screen.fill((94,151,250))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
