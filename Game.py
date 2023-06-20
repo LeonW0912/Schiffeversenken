@@ -1,35 +1,37 @@
 import os.path
-
 import pygame
 import numpy as np
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox
 import sys
 import random
 import pymsgbox
-import time
 
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.10
+# Version: 0.11
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
-# TODO: Evtl. 2 Spielermodus?
-# TODO: Evtl. Online Multiplayer?
+# TODO: Evtl. 2 Spielermodus? -> Später Nicht genügend Zeit
+# TODO: Evtl. Online Multiplayer? -> SPäter Nicht genügend Zeit
 # TODO: evtl. Header für PyQT6
 
+# Klasse für einen Button in Pygame
 class Button:
+    #Initiator (Allgemeine EInstellungen)
     def __init__(self, x, y, width, height, color, text=''):
         self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.text = text
         self.font = pygame.font.Font(None, 24)
 
+    #Button Erstellen / dem Fenster hinzufügen
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect)
         text_surface = self.font.render(self.text, True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=self.rect.center)
         surface.blit(text_surface, text_rect)
+
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
@@ -102,6 +104,7 @@ check_var = False # Für Gewisse Funktionen
 # Grundlegende Dinge Wie die App, das Fenster usw.
 app = QApplication(sys.argv)
 window = QMainWindow()
+window.setWindowTitle("Schwierigkeits Auswahl")
 widget = QWidget()
 layout = QVBoxLayout(widget)
 
@@ -886,10 +889,10 @@ def diff_hard():
 #Array Variaben
 visual_array = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung des Spielers
 visual_array_KI = np.zeros((10, 10), dtype=int) #Zur Visuellen Darstellung der KI
-Ships_P1 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P1
-Ships_P2 = np.zeros((10, 10), dtype=int)     #Schiffpositionen von P2
-Grid_P1 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben P1
-Grid_P2 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben P2
+Ships_P1 = np.zeros((10, 10), dtype=int)     # Schiffpositionen von Player 1
+Ships_P2 = np.zeros((10, 10), dtype=int)
+Grid_P1 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben Player 1
+Grid_P2 = np.zeros((10, 10), dtype=int)
 
 #PyGame Variablen
 FPS = 20 # FPS (selbsterklärend)
@@ -966,6 +969,7 @@ while running:
                         layout.addWidget(KI_text)
                         layout.addWidget(Progress_KI)
                         layout.addStretch()
+                        window.setWindowTitle("Aktueller Stand")
                         layout.update()
                     else:
                         print("Es sind noch nicht alle Schiffe platziert")
