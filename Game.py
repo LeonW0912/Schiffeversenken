@@ -33,12 +33,13 @@ class Button:
         surface.blit(text_surface, text_rect)
 
 
-    def is_clicked(self, pos):
+    def is_clicked(self, pos): #Wenn Button angeklickt wurde gib position
         return self.rect.collidepoint(pos)
 
+# Funktion für wenn ein button von PyQt6 Gedrückt wurde
 def QT_button_clicked():
     global difficulty
-    sender = window.sender()
+    sender = window.sender() # sender = gedrückter button einfach gesagt
     # Alle Buttons auf Standardfarbe zurücksetzen
     button_easy.setStyleSheet('''
     QPushButton {
@@ -77,6 +78,7 @@ def QT_button_clicked():
         background-color: #FFD700;
     }
     ''')
+    # Ausgabe und Schwierigkeitssetzung
     if sender.text() == "Einfach":
         print("Einfach ausgewählt")
         difficulty = 1
@@ -88,17 +90,17 @@ def QT_button_clicked():
         difficulty = 3
 
 
-# Alle Benötigten Variablen
-# pygame Farben:
+# Wichtige Variablen
+# pygame Farben (meisten davon eigentlich nicht benötigt):
 WHITE = pygame.Color("WHITE")
 GRAY = pygame.Color("GRAY")
 BLACK = pygame.Color("BLACK")
 MEERBLAU = pygame.Color(37,59,98)
 # Allgemeinere Variablen:
 Ship_Size = 5 # Aktuelle Schiffsgröße bei Schiffssetzung (für die Schleifen)
-click_counter = 0 # Zählt hoch wenn ein Schiff erfolgreich platziert wurde
+click_counter = 0 #
 richtung = 4 #1 Links 2 Rechts 3 Hoch 4 Runter
-check_var = False # Für Gewisse Funktionen
+check_var = False #
 
 #PyQt6
 # Grundlegende Dinge Wie die App, das Fenster usw.
@@ -108,13 +110,16 @@ window.setWindowTitle("Schwierigkeits Auswahl")
 widget = QWidget()
 layout = QVBoxLayout(widget)
 
-button_easy = QPushButton("Einfach") # Einfacher Schwierigkeitsbutton
-button_medium = QPushButton("Mittel") # Mittlerer Schwierigkeitsbutton
-button_hard = QPushButton("Schwer") # Schwerer Schwierigkeitsbutton
+#Schwierigkeitsbuttons
+button_easy = QPushButton("Einfach")
+button_medium = QPushButton("Mittel")
+button_hard = QPushButton("Schwer")
 
+# Höhe der Buttons setzen
 button_easy.setFixedHeight(50)  # Höhe des Buttons "Einfach" auf 50 Pixel setzen
 button_medium.setFixedHeight(50)  # Höhe des Buttons "Mittel" auf 50 Pixel setzen
 button_hard.setFixedHeight(50)  # Höhe des Buttons "Schwer" auf 50 Pixel setzen
+
 # Gestaltung der Buttons mittels QSS
 app.setStyleSheet('''
     QPushButton {
@@ -128,6 +133,7 @@ app.setStyleSheet('''
         background-color: gray;
     }
     ''')
+
 # andere Farbe für Medium Button da er standardmäßig ausgewählt ist
 button_medium.setStyleSheet('''
     QPushButton {
@@ -138,6 +144,7 @@ button_medium.setStyleSheet('''
         background-color: #FFD700;
     }
     ''')
+
 difficulty = 2 # Standard Schwierigkeit Mittel
 
 # Die Funktion für wenn der Button geklickt wurde anbinden
@@ -159,15 +166,17 @@ window.setGeometry(100, 100, 300, 300)
 window.show()
 pygame.init()
 
+# Funktion zum Erstellen des Linken (Spieler) Grids
 def draw_Grid():
     global click_counter
     global Ship_Size
     global check_var
     global richtung
-    blocksize = 50
+    blocksize = 50 # Größe der Kästchen 50 angemessen und auf Fenstergröße optimiert WARNUNG: Änderungen NICHT Empfohlen
 
     # Layout (A-J & 1-10)
-    font = pygame.font.SysFont(None, 25)
+    font = pygame.font.SysFont(None, 25) # Scriftart für Texte in Pygame
+    #Buchstaben und Zahlen schreiben mit jeweiliger Positionierung
     for i in range(10):
         # A-J rechts vom Grid
         text = font.render(chr(ord('A') + i), True, BLACK)
@@ -177,97 +186,102 @@ def draw_Grid():
         text = font.render(str(i + 1), True, BLACK)
         screen.blit(text, (i * blocksize + 20, 10 * blocksize + 10))
 
-    # Grid
+    # Eigentliches Grid wird erstellt
     for x in range(0, 10*blocksize, blocksize):
         for y in range(0, 10*blocksize, blocksize):
-            rect = pygame.Rect(x, y, blocksize, blocksize)
-            if visual_array[y//blocksize][x//blocksize] == 0:   #Normales Feld ohne alles
+            rect = pygame.Rect(x, y, blocksize, blocksize) #Rechteck erstellen
+
+            #Verschiedene Arten von Füllungen für die Kästchen
+            if visual_array[y//blocksize][x//blocksize] == 0:   #Normales Feld ohne alles Wenn dementsprechender index im array 0 ist
                 pygame.draw.rect(screen, GRAY, rect, 1)
-            elif visual_array[y//blocksize][x//blocksize] == 1: #Feld mit Explosion (also getroffen)
+            elif visual_array[y//blocksize][x//blocksize] == 1: #Feld mit Explosion (also getroffen) Wenn dementsprechender index im array 1 ist
                 screen.blit(exp_image, rect)
-            elif visual_array[y//blocksize][x//blocksize] == 2: #Feld mit Splash (also daneben)
+            elif visual_array[y//blocksize][x//blocksize] == 2: #Feld mit Splash (also daneben) Wenn dementsprechender index im array 2 ist
                 screen.blit(spl_image, rect)
-            elif visual_array[y//blocksize][x//blocksize] == 3:
-                visual_array[y//blocksize][x//blocksize] = 0
-                if richtung == 1:   # Rechts
+            elif visual_array[y//blocksize][x//blocksize] == 3: #Schiffssetzung Wenn dementsprechender index im array 0 ist
+                visual_array[y//blocksize][x//blocksize] = 0 #Hat seine Gründe weiß nicht warum
+                if richtung == 1:   # Rechts                 #Richtungen werden durch User Per Keyboard eingegeben (← ↑ ↓ →)
                     check_var = False
                     for i in range(Ship_Size):
-                        if x//blocksize + i >= 10:
+                        if x//blocksize + i >= 10: #Wenn Über Rechten Rand Hinaus
                             check_var = True
                         else:
-                            if visual_array[y//blocksize][x//blocksize + i] > 0:
+                            if visual_array[y//blocksize][x//blocksize + i] > 0: #Wenn Feld Nicht Frei ist oder schon beschossen wurde
                                 check_var = True
                                 break
-                    if check_var == False:
+                    if check_var == False: #Wenn beides oben genannte nicht wahr ist
                         for i in range(Ship_Size):
                             visual_array[y//blocksize][x//blocksize + i] = 5
                             Ships_P1[y//blocksize][x//blocksize + i] = 1
                     else:
+                        # Schiffsplatzierung nicht möglich
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
                         pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 2: # Links
                     check_var = False
                     for i in range(Ship_Size):
-                        if x//blocksize - i < 0:
+                        if x//blocksize - i < 0: #Wenn über Linken Rand hinaus
                             check_var = True
                         else:
-                            if visual_array[y//blocksize][x//blocksize - i] > 0:
+                            if visual_array[y//blocksize][x//blocksize - i] > 0: #Wenn Feld Nicht Frei ist oder schon beschossen wurde
                                 check_var = True
                                 break
-                    if check_var == False:
+                    if check_var == False: #Wenn beides oben gannannte nicht wahr ist
                         for i in range(Ship_Size):
                             visual_array[y//blocksize][x//blocksize - i] = 5
                             Ships_P1[y//blocksize][x//blocksize - i] = 1
                     else:
+                        #Schiffsplatzierung nicht möglich
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
                         pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 3:  # Hoch
                     check_var = False
                     for i in range(Ship_Size):
-                        print(y//blocksize-i)
-                        if (y//blocksize) - i < 0:
-                            print("TEst")
+                        if (y//blocksize) - i < 0: #Wenn über Oberen Rand hinaus
                             check_var = True
                         else:
-                            if visual_array[y // blocksize - i][x // blocksize] > 0:
+                            if visual_array[y // blocksize - i][x // blocksize] > 0: #Wenn Feld Nicht Frei ist oder schon beschossen wurde
                                 check_var = True
-                    if check_var == False:
+                    if check_var == False: # Wenn beides oben gannannte nicht wahr ist
                         for i in range(Ship_Size):
                             visual_array[y // blocksize - i][x // blocksize] = 5
                             Ships_P1[y // blocksize - i][x // blocksize] = 1
                     else:
+                        # Schiffsplatzierung nicht möglich
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
                         pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
                 elif richtung == 4: # Runter
                     check_var = False
                     for i in range(Ship_Size):
-                        if y//blocksize + i >= 10:
+                        if y//blocksize + i >= 10: #Wenn über den unteren Rand hinaus
                             check_var = True
                         else:
-                            if visual_array[y//blocksize + i][x//blocksize] > 0:
+                            if visual_array[y//blocksize + i][x//blocksize] > 0: #Wenn Feld Nicht Frei ist oder schon ebschossen wurde
                                 check_var = True
-                    if check_var == False:
+                    if check_var == False: #Wenn beides Oben gennannte nicht wahr ist
                         for i in range(Ship_Size):
                             visual_array[y//blocksize + i][x//blocksize] = 5
                             Ships_P1[y//blocksize + i][x//blocksize] = 1
                     else:
+                        # Schiffsplatzierung nicht möglich
                         click_counter = click_counter - 1
                         print("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!")
                         pymsgbox.alert(str("Etwas ist in Weg oder das Schiff würde außerhalb des Feldes gehen!"), "Fehler 01", button="OK")
-                if click_counter == 10:
+                if click_counter == 10: #Wenn ClickCounter 10 dann Ship_Size auf 0 damit nichts gesetzt werden kann
                     Ship_Size = 0
             elif visual_array[y//blocksize][x//blocksize] == 4: # Überprüfung Treffer / Daneben
-                Ship_Size = 1 #Platzhalter
-            elif visual_array[y//blocksize][x//blocksize] == 5: # Platzhalter Schiff Image
+                Ship_Size = 1
+            elif visual_array[y//blocksize][x//blocksize] == 5: # Schiff Image
                 screen.blit(placeholder, rect)
-            else:
+            else: # Nichts davon
                 destroy_Grid()
 
+# Funktion zum Erstellen des Rechten (KI) Grids
 def draw_KI_Grid():
-    blocksize = 50
+    blocksize = 50 # s. draw_Grid()
 
     # Layout (A-J & 1-10)
     font = pygame.font.SysFont(None, 25)
@@ -283,7 +297,7 @@ def draw_KI_Grid():
     # Grid
     for x in range(0, 10*blocksize, blocksize):
         for y in range(0, 10*blocksize, blocksize):
-            rect = pygame.Rect(screen_width-x-blocksize, y, blocksize, blocksize)
+            rect = pygame.Rect(screen_width-x-blocksize, y, blocksize, blocksize) #Rechteck zeichnen
             if visual_array_KI[y//blocksize][x//blocksize] == 0:   #Normales Feld ohne alles
                 pygame.draw.rect(screen, GRAY, rect, 1)
             elif visual_array_KI[y//blocksize][x//blocksize] == 1: #Feld mit Explosion (also getroffen)
@@ -291,6 +305,7 @@ def draw_KI_Grid():
             elif visual_array_KI[y//blocksize][x//blocksize] == 2: #Feld mit Splash (also daneben)
                 screen.blit(spl_image, rect)
 
+# Funktion zum Zerstörren des Linken Grids
 def destroy_Grid():
     global visual_array
     visual_array[9][9] = 6
@@ -299,16 +314,18 @@ def destroy_Grid():
     pygame.display.update()
     #draw_Grid()
 
+# Funktion um herauszufinden wohin du im linken Grid geklickt hast
 def get_clicked_index(pos):
-    blocksize = 50
+    blocksize = 50 # s. draw_Grid()
     for x in range(0, 10*blocksize, blocksize):
         for y in range(0, 10*blocksize, blocksize):
             rect = pygame.Rect(x, y, blocksize, blocksize)
-            if rect.collidepoint(pos):
-                return (x // blocksize, y // blocksize)
+            if rect.collidepoint(pos): # Wenn Rechteck mit Klicken Kollidiert
+                return (x // blocksize, y // blocksize) # Gebe X und Y des Geklickten Feldes aus
     return None
 
-def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
+#Erstellt Grid mit zufällig platzierten Schiffen
+def generate_random_grid():
     done_counter = 0
 
     #5er Schiff
@@ -543,21 +560,23 @@ def generate_random_grid(): #Erstellt Grid mit zufällig platzierten Schiffen
 def diff_easy():
     möglich = False
     global Getroffen_P2
-    while möglich == False:
+    while möglich == False: # Solange es nicht möglich ist das Feld zu beschießen
         x = random.randint(0, 9)
         y = random.randint(0, 9)
-        if Grid_P2[y][x] == 0:
+        if Grid_P2[y][x] == 0: # Wenn beschossenes Feld nicht bereits beschossen wurde
             möglich = True
             print("Ki schießt auf: ", y, x, "...")
-            if Ships_P1[y][x] == 1:
+            if Ships_P1[y][x] == 1: # Wenn Getroffen
                 Grid_P2[y][x] = 1
                 Getroffen_P2 = Getroffen_P2 + 1
+                # Alles Visuell / GUI / UI
                 print("... Getroffen!")
                 visual_array_KI[y][x] = 1
                 Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                 layout.update()
-            elif Ships_P1[y][x] == 0:
+            elif Ships_P1[y][x] == 0: # Wenn Daneben
                 Grid_P2[y][x] = 2
+                #Visuell / GUI / UI
                 visual_array_KI[y][x] = 2
                 print("... Daneben!")
     # Logik : KI schießt einfach Zufällig auf ein Feld das er noch nicht getroffen hat ohne jegliches Muster oder Algorythmus
@@ -856,14 +875,14 @@ def diff_middle():
 def diff_hard():
     möglich = False
     global Getroffen_P2
-    while möglich == False:
+    while möglich == False: # Solange es nicht möglich ist auf dieses Feld zu schießen
         treffwahrscheinlichkeit = random.randint(1, 100)
         ist_richtig = False
         if treffwahrscheinlichkeit < 86: # 85% Chance das er Trifft
             while ist_richtig == False:
                 x = random.randint(0, 9)
                 y = random.randint(0, 9)
-                if Ships_P1[y][x] == 1:
+                if Ships_P1[y][x] == 1: # Ist das beschossene Feld getroffen?
                     print("Ki schießt auf: ", y, x, "...")
                     print("... Getroffen!")
                     Getroffen_P2 = Getroffen_P2 + 1
@@ -877,7 +896,7 @@ def diff_hard():
             while ist_richtig == False:
                 x = random.randint(0, 9)
                 y = random.randint(0, 9)
-                if Ships_P1[y][x] == 0:
+                if Ships_P1[y][x] == 0: # Ist das beschossene Feld daneben?
                     print("Ki schießt auf: ", y, x, "...")
                     print("... Daneben!")
                     ist_richtig = True
@@ -895,54 +914,52 @@ Grid_P1 = np.zeros((10, 10), dtype=int)      # Treffer / Daneben Player 1
 Grid_P2 = np.zeros((10, 10), dtype=int)
 
 #PyGame Variablen
-FPS = 20 # FPS (selbsterklärend)
-screen_width = 1280 #ScreenBreite
-screen_height = 550 #ScreenHöhe
-pygame.display.set_caption("Schiffe versenken by Leon Walter") #Fenstertitel
-screen = pygame.display.set_mode((screen_width, screen_height)) #Breite/Höhe es Fensters setzen
+FPS = 20
+screen_width = 1280
+screen_height = 550
+pygame.display.set_caption("Schiffe versenken by Leon Walter")
+screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
-running = True #Läuft das Spiel Bedingungsvariable
-möglich = False #Ist die Schiffsplatzierung möglich Bedingungsvariable
-algorithmus = False #algorithmusvariable für Schleife
-im_alg_getroffen = False # s. o.
-save_x = 0 # Für Algorihtmus
-save_y = 0 # s. o.
-save_richtung = 0 #s.o.
-Mode = 1 # Modus (1=Schiffssetzung; 2=Spielverlauf 3=Nichts)
-Getroffen_P1 = 0 #Anzahl getroffene Schiffsfelder Spieler 1
-Getroffen_P2 = 0 #Anzahl getroffene Schiffsfelder Spieler 2
+running = True
+möglich = False
+algorithmus = False
+im_alg_getroffen = False
+save_x = 0
+save_y = 0
+save_richtung = 0
+Mode = 1
+Getroffen_P1 = 0
+Getroffen_P2 = 0
 
 # Variablen die für den Button gebraucht werden
-button_width = 200 #BreiteButton
-button_height = 50 #HöheButton
+button_width = 200
+button_height = 50
 button_x = (screen_width - button_width) // 2 + 25 #Positionierung des Buttons in X
 button_y = (screen_height - button_height) // 2 #Positionierung des Buttons in Y
-button = Button(button_x, button_y, button_width, button_height, (255, 0, 0), "Feld abgeben") #Buttonvariable
+button = Button(button_x, button_y, button_width, button_height, (255, 0, 0), "Feld abgeben")
 
 # Bildvariablen
-current_dir = os.path.dirname(os.path.abspath(__file__))
+current_dir = os.path.dirname(os.path.abspath(__file__)) #Sollte das Spiel aus irgendeinen Grund nicht Funktionieren und
+#  es hängt mit den Bildern zusammen, liegt es Sehr Wahrscheinlich hieran
 exp_image = pygame.image.load(current_dir + '\explosion.jpg')
 spl_image = pygame.image.load(current_dir + '\splash.jpg')
 placeholder = pygame.image.load(current_dir + '\PlaceHolder.png')
 
 while running:
-    screen.fill((94,151,250))
+    screen.fill((94,151,250)) #MeerBlau
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT: #Wenn Geschlossen Wird
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if button is not None:
-                if button.is_clicked(event.pos):
+        elif event.type == pygame.MOUSEBUTTONDOWN: #Wenn Maustaste geklickt wurde
+            if button is not None: # Wenn Button existiert
+                if button.is_clicked(event.pos): #Wenn Button angecklickt wurde
                     button.color = pygame.Color("BLUE")
-                    print('Button clicked')
-                    print(click_counter)
-                    print(Ships_P1)
-                    # Check if all Ships are placed
+                    print('Feld abgesendet')
                     if click_counter == 10:
                         destroy_Grid()
                         visual_array = np.zeros((10, 10), dtype=int)
-                        button = None
+                        button = None # "Löscht" Button
                         generate_random_grid()
                         Mode = 2
                         # PyQt6 Teil:
@@ -955,6 +972,7 @@ while running:
                         button_hard.setParent(None)
                         layout.update()
                         layout.setContentsMargins(0, -10, 0, -10)
+                        #Erstellt die Variablen für den Forschritts Balken
                         layout.setSpacing(5)
                         Spieler_text = QLabel("Spieler Fortschritt")
                         Progress_Player = QProgressBar()
@@ -962,6 +980,7 @@ while running:
                         KI_text = QLabel("KI Fortschritt")
                         Progress_KI = QProgressBar()
                         Progress_KI.setFixedHeight(20)
+                        #Fügt die Forschritt Balken hinzu
                         layout.addSpacing(50)
                         layout.addWidget(Spieler_text)
                         layout.addWidget(Progress_Player)
@@ -971,85 +990,85 @@ while running:
                         layout.addStretch()
                         window.setWindowTitle("Aktueller Stand")
                         layout.update()
-                    else:
+                    else: # Wenn nicht alle Schiffe platziert sind
                         print("Es sind noch nicht alle Schiffe platziert")
                         pymsgbox.alert(str("Es sind noch nicht alle Schiffe platziert!"), "Fehler 02", button="OK")
 
-            if Mode == 1: # Schiffsetzung
-                index = get_clicked_index(event.pos)
-                if index is not None:
+            if Mode == 1: # Modus Schiffsetzung
+                index = get_clicked_index(event.pos) #Holt sich cen Index des Geklickten Feldes
+                if index is not None: # Wenn er nicht Nichts ist
                     x = index[0]
                     y = index[1]
-                    if Ship_Size != 0:
-                        if visual_array[y][x] == 0:
+                    if Ship_Size != 0: #Wenn noch Schiffe zu platzieren sind
+                        if visual_array[y][x] == 0: #Wenn Feld Frei ist
                             visual_array[y][x] = 3
-                        else:
+                        else: #Feld nicht mehr frei
                             click_counter = click_counter - 1
-                    if click_counter != 10:
+                    if click_counter != 10: #Solange Clickcounter <10 rechne +1
                         click_counter = click_counter + 1
-                    if click_counter == 2:
+                        print(click_counter)
+                    if click_counter == 2: #Wenn 1 5xSchiffe gesetzt wurden
                         Ship_Size = 4
-                    elif click_counter == 4:
+                    elif click_counter == 4: #Wenn 2 4xSchiffe gesetzt wurden
                         Ship_Size = 3
-                    elif click_counter == 7:
+                    elif click_counter == 7: #Wenn 3 3xSchiffe gesetzt wurden
                         Ship_Size = 2
-                    #Wird Ausgeführt BEVOR das ins array geht deswegen wann geschieht es + 1
-            elif Mode == 2: # Spielverlauf
+                    # WICHTIG!! Wird Ausgeführt !!BEVOR!! das ins array geht deswegen wann geschieht es + 1
+            elif Mode == 2: # Modus Spielverlauf
                 möglich2 = False
-                index = get_clicked_index(event.pos)
-                print(Getroffen_P2)
-                if Getroffen_P1 == 30:
+                index = get_clicked_index(event.pos) # Holt sich Index des geklickten Feldes
+                if Getroffen_P1 == 30: #Hat Spieler 1 Gewonnen?
                     print("Spieler 1 hat gewonnen")
                     Mode = 3
-                elif Getroffen_P2 == 30:
+                elif Getroffen_P2 == 30: #Hat Spieler 2 Gewonnen?
                     print("Spieler 2 hat gewonnen")
                     Mode = 3
 
-                if index is not None:
+                if index is not None: #Falls Index nicht Nichts
                     x = index[0]
                     y = index[1]
-                    if Grid_P1[y][x] == 0:
+                    if Grid_P1[y][x] == 0: #Falls Feld frei / nicht bereits beschossen wurde
                         möglich2 = True
-                        if Ships_P2[y][x] == 1:
-                            visual_array[y][x] = 1 # Getroffen
+                        if Ships_P2[y][x] == 1: #Wenn Getroffen
+                            visual_array[y][x] = 1
                             Grid_P1[y][x] = 1
                             Getroffen_P1 = Getroffen_P1 + 1
                             Progress_Player.setValue(round(Getroffen_P1 / 30 * 100))
                             layout.update()
-                        else:
-                            visual_array[y][x] = 2 # Daneben
+                        else: #Wenn Daneben
+                            visual_array[y][x] = 2
                             Grid_P1[y][x] = 2
-                    else:
+                    else: # Wenn Feld bereits beschossen wurde
                         print("Auf dieses Feld wurde schon geschossen")
                         pymsgbox.alert(str("Auf dieses Feld wurde schon geschossen!"), "Fehler 03", button="OK")
 
-                    if möglich2 == True:
-                        if Getroffen_P2 < 30:
-                            if difficulty == 1:
+                    if möglich2 == True: #Wenn Schuss "erfolgreich" (nicht im sinne getroffen) abgeschossen wurde
+                        if Getroffen_P2 < 30: #Wenn KI noch nicht gewonnen hat
+                            if difficulty == 1: #Einfach
                                 diff_easy()
-                            elif difficulty == 2:
+                            elif difficulty == 2: #Mittel
                                 diff_middle()
-                            elif difficulty == 3:
+                            elif difficulty == 3: #Schwer
                                 diff_hard()
-
+        #Hotkeys
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT: #Rechtepfeiltaste für Schiffsplatzierung nach Rechts
                 print("Rechts")
                 richtung = 1
-            elif event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_LEFT: #Linkepfeiltaste für Schiffsplatzierung nach Links
                 print("Links")
                 richtung = 2
-            elif event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP: #Pfeiltastehoch für Schiffsplatzierung nach Oben
                 print("Hoch")
                 richtung = 3
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN: #Pfeiltasterunter für Schiffsplatzierung nach Unten
                 print("Runter")
                 richtung = 4
 
-    if button is not None:
+    if button is not None: #Wenn Button existiert bringe ihn auf die GUI / UI
         button.draw(screen)
     draw_Grid()
-    if Mode == 2:
+    if Mode == 2: #Spielverlauf Extra Zeichne KI Grid
         draw_KI_Grid()
 
     def closeEvent(self, event): #Schließevent für beides
