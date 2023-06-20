@@ -9,12 +9,13 @@ import pymsgbox
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.11
+# Version: 0.13
 #
 # TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus? -> Später Nicht genügend Zeit
 # TODO: Evtl. Online Multiplayer? -> SPäter Nicht genügend Zeit
-# TODO: evtl. Header für PyQT6
+# TODO: Evtl. Header für PyQT6
+# TODO: DRINGEND: Mittlere Schwierigkeit ist broken
 
 # Klasse für einen Button in Pygame
 class Button:
@@ -328,44 +329,44 @@ def get_clicked_index(pos):
 def generate_random_grid():
     done_counter = 0
 
-    #5er Schiff
+    #5er Schiffe
     placed = False
-    while placed == False:
+    while placed == False: #Solange Schiff nicht platzier ist
         placeable = True
         random_x = random.randint(0, 9)
         random_y = random.randint(0, 9)
         direction = random.randint(1, 4)
-        if direction == 1: # Rechts
+        if direction == 1: # Platzierung Nach Rechts
             for i in range(5):
-                if random_x + i > 9:
+                if random_x + i > 9: # Geht es über den Rand hinaus
                     placeable = False
-            if placeable == True:
+            if placeable == True: # Ist es Platzierbar
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y][random_x + j] = 1
-        elif direction == 2: # Links
+        elif direction == 2: # Platzierung Nach Links
             for i in range(5):
-                if random_x - i <= 0:
+                if random_x - i <= 0: # Geht es über den Rand hinaus
                     placeable = False
-            if placeable == True:
+            if placeable == True: # Ist es platzierbar
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y][random_x - j] = 1
 
-        elif direction == 3: # Hoch
+        elif direction == 3: # Platzierung nach Oben
             for i in range(5):
-                if random_y - i <= 0:
+                if random_y - i <= 0: # Geht es über den Rand?
                     placeable = False
-            if placeable == True:
+            if placeable == True: # ISt es Platzierbar
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y - j][random_x] = 1
 
-        elif direction == 4: # Runter
+        elif direction == 4: # Platzierung Nach Unten
             for i in range(5):
-                if random_y + i > 9:
+                if random_y + i > 9: # Geht es Über den Rand?
                     placeable = False
-            if placeable == True:
+            if placeable == True: # ISt es platzierbar?
                 placed = True
                 for j in range(5):
                     Ships_P2[random_y + j][random_x] = 1
@@ -377,58 +378,58 @@ def generate_random_grid():
         done_counter = done_counter + 1
         print(str(done_counter) + "/10 Schiffen gesetzt")
         placed = False
-        while placed == False:
+        while placed == False: # Solange Schiff nicht platzier ist
             placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
-            if direction == 1:  # Rechts
+            if direction == 1:  # Platzierung Nach Rechts
                 for i in range(4):
-                    if random_x + i > 9:
+                    if random_x + i > 9: # geht es über den Rand
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x + i] == 1:
+                        if Ships_P2[random_y][random_x + i] == 1: # Ist schon ein Schiff im Weg?
                             placeable = False
 
-                if placeable == True:
+                if placeable == True: # ISt es Platzierbar
                     placed = True
                     for j in range(4):
                         Ships_P2[random_y][random_x + j] = 1
-            elif direction == 2:  # Links
+            elif direction == 2:  # Platzierung nach Links
                 for i in range(4):
-                    if random_x - i <= 0:
+                    if random_x - i <= 0: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x - i] == 1:
+                        if Ships_P2[random_y][random_x - i] == 1: # Ist schon ein schiff im Weg?
                             placeable = False
 
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(4):
                         Ships_P2[random_y][random_x - j] = 1
 
-            elif direction == 3:  # Hoch
+            elif direction == 3:  # Platzierung nach Oben
                 for i in range(4):
-                    if random_y - i <= 0:
+                    if random_y - i <= 0: # Geht es über den Rand
                         placeable = False
                     else:
-                        if Ships_P2[random_y - i][random_x] == 1:
+                        if Ships_P2[random_y - i][random_x] == 1: # Ist schon ein Schiff im Weg?
                             placeable = False
 
-                if placeable == True:
+                if placeable == True: # Ist es Platzierbar?
                     placed = True
                     for j in range(4):
                         Ships_P2[random_y - j][random_x] = 1
 
-            elif direction == 4:  # Runter
+            elif direction == 4:  # Platzierung nach Unten
                 for i in range(4):
-                    if random_y + i > 9:
+                    if random_y + i > 9: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y + i][random_x] == 1:
+                        if Ships_P2[random_y + i][random_x] == 1: # ISt schon ein Schiff im Weg?
                             placeable = False
 
-                if placeable == True:
+                if placeable == True: # Ist es Platzierbar?
                     placed = True
                     for j in range(4):
                         Ships_P2[random_y + j][random_x] = 1
@@ -438,58 +439,54 @@ def generate_random_grid():
         placed = False
         done_counter = done_counter + 1
         print(str(done_counter) + "/10 Schiffen gesetzt")
-        while placed == False:
+        while placed == False: # Solange es nicht platzierbar ist?
             placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
-            if direction == 1:  # Rechts
+            if direction == 1:  # Platzierung Nach Rechts
                 for i in range(3):
-                    if random_x + i > 9:
+                    if random_x + i > 9: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x + i] == 1:
+                        if Ships_P2[random_y][random_x + i] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(3):
                         Ships_P2[random_y][random_x + j] = 1
-            elif direction == 2:  # Links
+            elif direction == 2:  # Platzierung Nach Links
                 for i in range(3):
-                    if random_x - i < 0:
+                    if random_x - i < 0: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x - i] == 1:
+                        if Ships_P2[random_y][random_x - i] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(3):
                         Ships_P2[random_y][random_x - j] = 1
 
-            elif direction == 3:  # Hoch
+            elif direction == 3:  # Platzierung Nach Oben
                 for i in range(3):
-                    if random_y - i < 0:
+                    if random_y - i < 0: # Geht es über den Rand
                         placeable = False
                     else:
-                        if Ships_P2[random_y - i][random_x] == 1:
+                        if Ships_P2[random_y - i][random_x] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es Platzierbar?
                     placed = True
                     for j in range(3):
                         Ships_P2[random_y - j][random_x] = 1
 
-            elif direction == 4:  # Runter
+            elif direction == 4:  # Platzierung Nach Unten
                 for i in range(3):
-                    if random_y + i > 9:
+                    if random_y + i > 9: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y + i][random_x] == 1:
+                        if Ships_P2[random_y + i][random_x] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(3):
                         Ships_P2[random_y + j][random_x] = 1
@@ -499,64 +496,63 @@ def generate_random_grid():
         placed = False
         done_counter = done_counter + 1
         print(str(done_counter) + "/10 Schiffen gesetzt")
-        while placed == False:
+        while placed == False: # Solange es nicht platzierbar ist
             placeable = True
             random_x = random.randint(0, 9)
             random_y = random.randint(0, 9)
             direction = random.randint(1, 4)
-            if direction == 1:  # Rechts
+            if direction == 1:  # Platzierung Nach Rechts
                 for i in range(2):
-                    if random_x + i > 9:
+                    if random_x + i > 9: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x + i] == 1:
+                        if Ships_P2[random_y][random_x + i] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar
                     placed = True
                     for j in range(2):
                         Ships_P2[random_y][random_x + j] = 1
-            elif direction == 2:  # Links
+
+            elif direction == 2:  # Platzierung Nach Links
                 for i in range(2):
-                    if random_x - i < 0:
+                    if random_x - i < 0: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y][random_x - i] == 1:
+                        if Ships_P2[random_y][random_x - i] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(2):
                         Ships_P2[random_y][random_x - j] = 1
 
-            elif direction == 3:  # Hoch
+            elif direction == 3:  # Platzierung Nach Oben
                 for i in range(2):
-                    if random_y - i < 0:
+                    if random_y - i < 0: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y - i][random_x] == 1:
+                        if Ships_P2[random_y - i][random_x] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(2):
                         Ships_P2[random_y - j][random_x] = 1
 
-            elif direction == 4:  # Runter
+            elif direction == 4:  # Platzierung Nach Unten
                 for i in range(2):
-                    if random_y + i > 9:
+                    if random_y + i > 9: # Geht es über den Rand?
                         placeable = False
                     else:
-                        if Ships_P2[random_y + i][random_x] == 1:
+                        if Ships_P2[random_y + i][random_x] == 1: # Ist ein Schiff im Weg?
                             placeable = False
-
-                if placeable == True:
+                if placeable == True: # Ist es platzierbar?
                     placed = True
                     for j in range(2):
                         Ships_P2[random_y + j][random_x] = 1
+    # Folgende 2 Zeilen sind zum anzeigen der schiffe im Python Terminal aka Cheating oder Testing
     print("KI Grid:")
     print(Ships_P2)
 
+# Einfache Schwierigkeit
 def diff_easy():
     möglich = False
     global Getroffen_P2
@@ -581,6 +577,7 @@ def diff_easy():
                 print("... Daneben!")
     # Logik : KI schießt einfach Zufällig auf ein Feld das er noch nicht getroffen hat ohne jegliches Muster oder Algorythmus
 
+# Mittlere Schwierigkeit
 def diff_middle():
     möglich = False
     möglich2 = False
@@ -872,6 +869,7 @@ def diff_middle():
     # ausgehend von dem Feld das er getroffen hat und schießt sofern es geht solange in die Richtung weiter bis entweder
     # das Ende erreicht ist, etwas blockiert oder Kein Schiff mehr da ist.
 
+# Schwere Schwierigkeit
 def diff_hard():
     möglich = False
     global Getroffen_P2
@@ -1019,9 +1017,11 @@ while running:
                 index = get_clicked_index(event.pos) # Holt sich Index des geklickten Feldes
                 if Getroffen_P1 == 30: #Hat Spieler 1 Gewonnen?
                     print("Spieler 1 hat gewonnen")
+                    pymsgbox.alert(str("Der Spieler hat Gewonnen!"), "Herzlichen Glückwunsch", button="OK")
                     Mode = 3
                 elif Getroffen_P2 == 30: #Hat Spieler 2 Gewonnen?
                     print("Spieler 2 hat gewonnen")
+                    pymsgbox.alert(str("Die KI hat Gewonnen!"), "Du wurdest geschlagen", button="OK")
                     Mode = 3
 
                 if index is not None: #Falls Index nicht Nichts
