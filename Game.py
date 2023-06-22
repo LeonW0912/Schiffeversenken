@@ -1,7 +1,9 @@
 import os.path
 import pygame
 import numpy as np
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox, QMenuBar
+import math
 import sys
 import random
 import pymsgbox
@@ -9,12 +11,10 @@ import pymsgbox
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.13
+# Version: 0.14
 #
-# TODO: Evtl. Algorithmus in Hinsicht verbessern wenn nichts mehr nach vorne geht das man es in die entgegengesetzte Richtung probiert
 # TODO: Evtl. 2 Spielermodus? -> Später Nicht genügend Zeit
 # TODO: Evtl. Online Multiplayer? -> SPäter Nicht genügend Zeit
-# TODO: Evtl. Header für PyQT6
 # TODO: DRINGEND: Mittlere Schwierigkeit ist broken
 
 # Klasse für einen Button in Pygame
@@ -110,6 +110,7 @@ window = QMainWindow()
 window.setWindowTitle("Schwierigkeits Auswahl")
 widget = QWidget()
 layout = QVBoxLayout(widget)
+
 
 #Schwierigkeitsbuttons
 button_easy = QPushButton("Einfach")
@@ -599,6 +600,7 @@ def diff_middle():
                     Grid_P2[y][x] = 1
                     Getroffen_P2 = Getroffen_P2 + 1
                     print("... Getroffen!")
+                    print (Ships_P1[y][x])
                     algorithmus = True
                     save_x = x
                     save_y = y
@@ -609,6 +611,7 @@ def diff_middle():
                     Grid_P2[y][x] = 2
                     visual_array_KI[y][x] = 2
                     print("... Daneben!")
+                    print(Ships_P1[y][x])
                 break
         elif algorithmus == True:
             if im_alg_getroffen == True:
@@ -929,6 +932,42 @@ Mode = 1
 Getroffen_P1 = 0
 Getroffen_P2 = 0
 
+#Pfeil Variablen
+arrow_length = 100
+arrow_color = BLACK
+arrow_thickness = 3
+arrow_head_size = 15
+arrow_direction = 270
+IsInPlaceMode = True
+
+def display_arrow(direction):
+    # Berechnet die Position des Pfeiles
+    arrow_x = screen_width * 0.75
+    arrow_y = screen_height // 2
+
+    # Berechnet den Endpunkt des Pfeiles anhand der Richtung
+    angle = math.radians(direction)
+    arrow_end_x = arrow_x + arrow_length * math.cos(angle)
+    arrow_end_y = arrow_y - arrow_length * math.sin(angle)
+    # "Malt" den Pfeil
+    pygame.draw.line(screen, arrow_color, (arrow_x, arrow_y), (arrow_end_x, arrow_end_y), arrow_thickness)
+
+    # Berechnet die Punkte des Pfeilkopfes
+    angle_left = math.radians(direction + 135)
+    arrow_left_x = arrow_end_x + arrow_head_size * math.cos(angle_left)
+    arrow_left_y = arrow_end_y - arrow_head_size * math.sin(angle_left)
+
+    angle_right = math.radians(direction - 135)
+    arrow_right_x = arrow_end_x + arrow_head_size * math.cos(angle_right)
+    arrow_right_y = arrow_end_y - arrow_head_size * math.sin(angle_right)
+
+    # Zeichnet den Pfeilkopf
+    pygame.draw.polygon(screen, arrow_color,
+                        [(arrow_end_x, arrow_end_y), (arrow_left_x, arrow_left_y), (arrow_right_x, arrow_right_y)])
+
+    # Updated das Display
+    pygame.display.flip()
+
 # Variablen die für den Button gebraucht werden
 button_width = 200
 button_height = 50
@@ -945,6 +984,8 @@ placeholder = pygame.image.load(current_dir + '\PlaceHolder.png')
 
 while running:
     screen.fill((94,151,250)) #MeerBlau
+    if IsInPlaceMode == True:
+        display_arrow(arrow_direction)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: #Wenn Geschlossen Wird
@@ -954,6 +995,7 @@ while running:
                 if button.is_clicked(event.pos): #Wenn Button angecklickt wurde
                     button.color = pygame.Color("BLUE")
                     print('Feld abgesendet')
+                    print(Ships_P1)
                     if click_counter == 10:
                         destroy_Grid()
                         visual_array = np.zeros((10, 10), dtype=int)
@@ -1013,6 +1055,7 @@ while running:
                         Ship_Size = 2
                     # WICHTIG!! Wird Ausgeführt !!BEVOR!! das ins array geht deswegen wann geschieht es + 1
             elif Mode == 2: # Modus Spielverlauf
+                IsInPlaceMode = False
                 möglich2 = False
                 index = get_clicked_index(event.pos) # Holt sich Index des geklickten Feldes
                 if Getroffen_P1 == 30: #Hat Spieler 1 Gewonnen?
@@ -1055,15 +1098,19 @@ while running:
             if event.key == pygame.K_RIGHT: #Rechtepfeiltaste für Schiffsplatzierung nach Rechts
                 print("Rechts")
                 richtung = 1
+                arrow_direction = 0
             elif event.key == pygame.K_LEFT: #Linkepfeiltaste für Schiffsplatzierung nach Links
                 print("Links")
                 richtung = 2
+                arrow_direction = 180
             elif event.key == pygame.K_UP: #Pfeiltastehoch für Schiffsplatzierung nach Oben
                 print("Hoch")
                 richtung = 3
+                arrow_direction = 90
             elif event.key == pygame.K_DOWN: #Pfeiltasterunter für Schiffsplatzierung nach Unten
                 print("Runter")
                 richtung = 4
+                arrow_direction = 270
 
     if button is not None: #Wenn Button existiert bringe ihn auf die GUI / UI
         button.draw(screen)
