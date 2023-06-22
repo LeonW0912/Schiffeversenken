@@ -1,7 +1,7 @@
 import os.path
 import pygame
 import numpy as np
-from PyQt6.QtCore import Qt
+import time
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QProgressBar, QLabel, QMessageBox, QMenuBar
 import math
 import sys
@@ -11,11 +11,10 @@ import pymsgbox
 ########################################################################################################################
 #                                              Schiffe Versenken by Leon Walter                                        #
 ########################################################################################################################
-# Version: 0.14
+# Version: 1.0
 #
 # TODO: Evtl. 2 Spielermodus? -> Später Nicht genügend Zeit
 # TODO: Evtl. Online Multiplayer? -> SPäter Nicht genügend Zeit
-# TODO: DRINGEND: Mittlere Schwierigkeit ist broken
 
 # Klasse für einen Button in Pygame
 class Button:
@@ -590,35 +589,36 @@ def diff_middle():
     global save_richtung
 
     while möglich == False:
-        if algorithmus == False:
+        if algorithmus == False: # Ist dafür zuständig eine Zufällige zahl zu generieren bis er trifft
+            print("JA")
             x = random.randint(0, 9)
             y = random.randint(0, 9)
-            if Grid_P2[y][x] == 0:
+            if Grid_P2[y][x] == 0:# Ist das Feld frei?
                 möglich = True
                 print("Ki schießt auf: ", y, x, "...")
-                if Ships_P1[y][x] == 1:
+                if Ships_P1[y][x] == 1: # getroffen
                     Grid_P2[y][x] = 1
                     Getroffen_P2 = Getroffen_P2 + 1
                     print("... Getroffen!")
-                    print (Ships_P1[y][x])
+                    print(Ships_P1[y][x])
                     algorithmus = True
                     save_x = x
                     save_y = y
                     visual_array_KI[y][x] = 1
                     Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                     layout.update()
-                elif Ships_P1[y][x] == 0:
+                elif Ships_P1[y][x] == 0: # Danebn
                     Grid_P2[y][x] = 2
                     visual_array_KI[y][x] = 2
                     print("... Daneben!")
                     print(Ships_P1[y][x])
                 break
-        elif algorithmus == True:
-            if im_alg_getroffen == True:
-                if save_richtung == 1:  #LI
-                    if save_x-1 >= 0:
-                        if Ships_P2[save_y][save_x-1] == 1:
-                            if Grid_P2[save_y][save_x-1] == 0:
+        elif algorithmus == True: # Algorithmus
+            if im_alg_getroffen == True: # Richtung wurde schon herausgefunden
+                if save_richtung == 1:  #Linke/Rechte Richtung
+                    if 9-save_x-1 >= 0 and 9-save_x-1 <10 and save_x-1 >= 0: #Geht es außerhalb
+                        if Ships_P2[save_y][9-save_x-1] == 1: # getroffen
+                            if Grid_P2[save_y][save_x-1] == 0: # Wurde dort schon geschossen
                                 print("Ki schießt auf: ", save_y, save_x-1, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -634,7 +634,7 @@ def diff_middle():
                                 diff_middle()
                                 möglich = True
                         else:
-                            if Grid_P2[save_y][save_x-1] == 0:
+                            if Grid_P2[save_y][save_x-1] == 0: # Wurde dort schon geschossen
                                 print("Ki schießt auf: ", save_y, save_x-1, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -653,10 +653,10 @@ def diff_middle():
                         algorithmus = False
                         diff_middle()
                         möglich = True
-                elif save_richtung == 2:#RE
-                    if save_x+1 < 10:
-                        if Ships_P2[save_y][save_x+1] == 1:
-                            if Grid_P2[save_y][save_x+1] == 0:
+                elif save_richtung == 2:#Rechts/Links
+                    if 9-save_x+1 < 10 and 9-save_x+1 >= 0 and save_x+1 < 10: # Geht es außerhalb?
+                        if Ships_P2[save_y][9-save_x+1] == 1: # Getroffen
+                            if Grid_P2[save_y][save_x+1] == 0: # Wurde auf das Feld schon geschossen?
                                 print("Ki schießt auf: ", save_y, save_x+1, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -672,7 +672,7 @@ def diff_middle():
                                 diff_middle()
                                 möglich = True
                         else:
-                            if Grid_P2[save_y][save_x+1] == 0:
+                            if Grid_P2[save_y][save_x+1] == 0: # Wurde auf das Feld schon geschossen
                                 print("Ki schießt auf: ", save_y, save_x+1, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -691,10 +691,10 @@ def diff_middle():
                         algorithmus = False
                         diff_middle()
                         möglich = True
-                elif save_richtung == 3:#HO
-                    if save_y-1 >= 0:
-                        if Ships_P2[save_y-1][save_x] == 1:
-                            if Grid_P2[save_y-1][save_x] == 0:
+                elif save_richtung == 3:#Hoch
+                    if save_y-1 >= 0: # Geht es außerhalb
+                        if Ships_P2[save_y-1][9-save_x] == 1: # Getroffen
+                            if Grid_P2[save_y-1][save_x] == 0: # Wurde das Feld schon beschossen
                                 print("Ki schießt auf: ", save_y-1, save_x, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -710,7 +710,7 @@ def diff_middle():
                                 diff_middle()
                                 möglich = True
                         else:
-                            if Grid_P2[save_y-1][save_x] == 0:
+                            if Grid_P2[save_y-1][save_x] == 0: # Wurde das Feld schon beschossen
                                 print("Ki schießt auf: ", save_y-1, save_x, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -729,10 +729,10 @@ def diff_middle():
                         algorithmus = False
                         diff_middle()
                         möglich = True
-                elif save_richtung == 4:#RU
-                    if save_y+1 < 10:
-                        if Ships_P2[save_y+1][save_x] == 1:
-                            if Grid_P2[save_y-1][save_x] == 0:
+                elif save_richtung == 4:#Runter
+                    if save_y+1 < 10: # Geht es auußerhalb
+                        if Ships_P2[save_y+1][9-save_x] == 1: # Getroffen
+                            if Grid_P2[save_y-1][save_x] == 0: # Wurde das Feld schon beschossen
                                 print("Ki schießt auf: ", save_y+1, save_x, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -748,7 +748,7 @@ def diff_middle():
                                 diff_middle()
                                 möglich = True
                         else:
-                            if Grid_P2[save_y+1][save_x] == 0:
+                            if Grid_P2[save_y+1][save_x] == 0: # Wurde das Feld schon beschossen?
                                 print("Ki schießt auf: ", save_y+1, save_x, "...")
                                 print("... Getroffen!")
                                 Getroffen_P2 = Getroffen_P2 + 1
@@ -767,10 +767,9 @@ def diff_middle():
                         algorithmus = False
                         diff_middle()
                         möglich = True
-            elif im_alg_getroffen == False:
+            elif im_alg_getroffen == False: # Richtung herausfinden
                 while möglich2 == False:
                     richtung = random.randint(1, 4)
-                    print(richtung)
                     #Wenn alle Felder in alle Richtungen blockiert sind:
                     if ((save_x - 1 < 0 or Grid_P2[save_y][save_x - 1] != 0) and  # Links
                         (save_x + 1 >= 10 or Grid_P2[save_y][save_x + 1] != 0) and  # Rechts
@@ -780,13 +779,13 @@ def diff_middle():
                         diff_middle()
                         möglich = True
                         möglich2 = True
-                    if richtung == 1: # Links
-                        if save_x-1 >= 0:
-                            if Grid_P2[save_y][save_x - 1] == 0:
+                    if richtung == 1: # Rechts
+                        if 9-save_x-1 >= 0: # Geht es außerhalb
+                            if Grid_P2[save_y][save_x - 1] == 0: # schon auf Feld geschossen
                                 print("Ki schießt auf: ", save_y, save_x-1, "...")
                                 möglich2 = True
                                 möglich = True
-                                if Ships_P1[save_y][save_x-1] == 1:
+                                if Ships_P1[save_y][9-save_x-1] == 1: # Getroffen
                                     Grid_P2[save_y][save_x-1] = 1
                                     save_y = save_y
                                     save_x = save_x - 1
@@ -797,18 +796,18 @@ def diff_middle():
                                     save_richtung = 1
                                     Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                                     layout.update()
-                                elif Ships_P1[save_y][save_x-1] == 0:
+                                elif Ships_P1[save_y][9-save_x-1] == 0: # Daneben
                                     Grid_P2[save_y][save_x - 1] = 2
                                     visual_array_KI[save_y][save_x - 1] = 2
                                     print("... Daneben!")
                                 break
-                    if richtung == 2: # Rechts
-                        if save_x+1 < 10:
-                            if Grid_P2[save_y][save_x + 1] == 0:
+                    if richtung == 2: # Links
+                        if 9-save_x+1 < 10: # Geht es außerhalb
+                            if Grid_P2[save_y][save_x + 1] == 0: # Schon auf das Feld geschossen?
                                 print("Ki schießt auf: ", save_y, save_x+1, "...")
                                 möglich2 = True
                                 möglich = True
-                                if Ships_P1[save_y][save_x+1] == 1:
+                                if Ships_P1[save_y][9-save_x+1] == 1: # Getroffen
                                     Grid_P2[save_y][save_x+1] = 1
                                     save_y = save_y
                                     save_x = save_x + 1
@@ -819,18 +818,18 @@ def diff_middle():
                                     save_richtung = 2
                                     Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                                     layout.update()
-                                elif Ships_P1[save_y][save_x+1] == 0:
+                                elif Ships_P1[save_y][9-save_x+1] == 0: # Daneben
                                     Grid_P2[save_y][save_x + 1] = 2
                                     visual_array_KI[save_y][save_x + 1] = 2
                                     print("... Daneben!")
                                 break
                     if richtung == 3: # Hoch
-                        if save_y-1 >= 0:
-                            if Grid_P2[save_y-1][save_x] == 0:
+                        if save_y-1 >= 0: # Geht es außerhalb?
+                            if Grid_P2[save_y-1][save_x] == 0: # Schon auf das Feld geschossen?
                                 print("Ki schießt auf: ", save_y-1, save_x, "...")
                                 möglich2 = True
                                 möglich = True
-                                if Ships_P1[save_y-1][save_x] == 1:
+                                if Ships_P1[save_y-1][9-save_x] == 1: # getroffen
                                     Grid_P2[save_y-1][save_x] = 1
                                     save_y = save_y - 1
                                     save_x = save_x
@@ -841,18 +840,18 @@ def diff_middle():
                                     save_richtung = 3
                                     Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                                     layout.update()
-                                elif Ships_P1[save_y-1][save_x] == 0:
+                                elif Ships_P1[save_y-1][9-save_x] == 0: # Daneben
                                     Grid_P2[save_y-1][save_x] = 2
                                     visual_array_KI[save_y - 1][save_x] = 2
                                     print("... Daneben!")
                                 break
                     if richtung == 4: # Runter
-                        if save_y+1 < 10:
-                            if Grid_P2[save_y+1][save_x] == 0:
+                        if save_y+1 < 10: # Geht es außerhalb
+                            if Grid_P2[save_y+1][save_x] == 0: # Schon auf das Feld geschossen?
                                 print("Ki schießt auf: ", save_y+1, save_x, "...")
                                 möglich2 = True
                                 möglich = True
-                                if Ships_P1[save_y+1][save_x] == 1:
+                                if Ships_P1[save_y+1][9-save_x] == 1: # getroffen
                                     Grid_P2[save_y+1][save_x] = 1
                                     save_y = save_y+1
                                     save_x = save_x
@@ -863,7 +862,7 @@ def diff_middle():
                                     save_richtung = 4
                                     Progress_KI.setValue(round(Getroffen_P2 / 30 * 100))
                                     layout.update()
-                                elif Ships_P1[save_y+1][save_x] == 0:
+                                elif Ships_P1[save_y+1][9-save_x] == 0: # Daneben
                                     Grid_P2[save_y+1][save_x] = 2
                                     visual_array_KI[save_y + 1][save_x] = 2
                                     print("... Daneben!")
